@@ -6,3 +6,9 @@
  * Version: 0.1.0
  * Text Domain: life-performances-plugin
 */
+if ( ! defined('ABSPATH') ) 
+{
+    exit;
+}
+
+echo "hello";
