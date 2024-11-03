@@ -43,9 +43,17 @@ class LifePerformances{
     }
 
     public function load_shortcode()
-    {
-        return 'Hello, the shortcode is working';
-    }
+    {?>
+        <div class = "form-group">
+            <div>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/j_S0upmiG7Q?si=ayY4EpAj1hDs7z6v" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <div>
+                <button type="button" class="btn btn-secondary">✔</button>
+                <button type="button" class="btn btn-secondary"><span class="glyphicon glyphicon-comment"></span></button>
+            </div>
+        </div>
+    <?php }
 
 }
 
