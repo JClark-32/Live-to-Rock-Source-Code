@@ -52,11 +52,6 @@ class LifePerformances{
             <div>
                 <iframe width="560" height="315" src="https://www.youtube.com/embed/j_S0upmiG7Q?si=ayY4EpAj1hDs7z6v" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
             </div>
-            <div>
-                <button id = "likeBtn" type="button" class="btn btn-secondary">✔</button>
-                <label id = "likeCount">0</label>
-                <button id = "commentBtn" type="button" class="btn btn-secondary">💬 Comments</span></button>
-            </div>
         </div>
     <?php }
 }
