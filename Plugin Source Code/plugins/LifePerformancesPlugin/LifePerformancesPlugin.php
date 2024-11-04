@@ -33,28 +33,32 @@ class LifePerformances{
             'all'
         );
 
+        wp_enqueue_script('jquery', 'https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js', array(), null, true);
+
+        wp_enqueue_script('bootstrap-min-script', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js', array(), null, true);
+
         wp_enqueue_script(
             'LifePerformancesPlugin',
             plugin_dir_url( __FILE__ ) . '/js/LifePerformancesPlugin.js',
-            array(),
+            array('jquery'),
             1 ,
-            'all'
+            true
         );
     }
 
     public function load_shortcode()
     {?>
-        <div class = "form-group">
+        <div id = "video-group"class = "form-group">
             <div>
                 <iframe width="560" height="315" src="https://www.youtube.com/embed/j_S0upmiG7Q?si=ayY4EpAj1hDs7z6v" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
             </div>
             <div>
-                <button type="button" class="btn btn-secondary">✔</button>
-                <button type="button" class="btn btn-secondary"><span class="glyphicon glyphicon-comment"></span></button>
+                <button id = "likeBtn" type="button" class="btn btn-secondary">✔</button>
+                <label id = "likeCount">0</label>
+                <button id = "commentBtn" type="button" class="btn btn-secondary">💬 Comments</span></button>
             </div>
         </div>
     <?php }
-
 }
 
 new LifePerformances();
