@@ -70,19 +70,21 @@ class LifePerformances{
 
     public function load_videosubmission()
     {?>
-        <div class="video-submission">
-            <h2>Post Your Life Performance?</h2>
-            <p>Paste a link to your video here</p>
+        <div class="wp-block-uagb-container uagb-block-dc229f8f alignfull uagb-is-root-container"><div class="uagb-container-inner-blocks-wrap">
+            <div class="video-submission">
+                <h2>Post Your Life Performance?</h2>
+                <p>Paste a link to your video here</p>
 
-            <form id="video-link" method="post">
-                <div class="input">
-                    <input type="link" name="video-url" placeholder="YouTube link here" required>
-                </div>
-                <div class="submit">
-                    <button type="submit" name="submit-video" class="submit-btn">Submit</button>
-                </div>
-            </form>
-        </div>
+                <form id="video-link" method="post">
+                    <div class="input">
+                        <input type="link" name="video-url" placeholder="YouTube link here" required>
+                    </div>
+                    <div class="submit">
+                        <button type="submit" name="submit-video" class="submit-btn">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div></div>
     <?php }
     
     public function load_shortcode()
@@ -179,9 +181,6 @@ class LifePerformances{
                 wp_redirect($_SERVER['REQUEST_URI']);
                 exit;
             }
-            else{
-                echo "Error, no button";
-            }
     }
 
     public function show_videos()
@@ -231,7 +230,6 @@ class LifePerformances{
             }
         </script>
         <?php 
-        echo "I'm a liar and don't work";
     }
 
 
