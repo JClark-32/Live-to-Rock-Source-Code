@@ -25,29 +25,13 @@ class LifePerformances{
         add_shortcode('video-submission', array( $this, 'load_videosubmission') );
 
         //load javascript
-        add_action('wp_footer', array($this, 'load_scripts'));
+        //add_action('wp_footer', array($this, 'load_scripts'));
 
         add_action('init', array($this,'video_id'));
 
         add_action('init', array($this, 'show_videos'));
 
 
-    }
-
-    public function create_video_submission(){
-        $args = array(
-            'public' => true,
-            'has_archive' => true,
-            'supports' => array('title'),
-            'exclude_from_search' => true,
-            'pulicly_queryable' => false,
-            'capability' => 'manage_options',
-            'labels' => array(
-                'name' => 'Life Performance',
-                'singular_name' => 'Share Your Music'
-            ),
-        );
-        register_post_type('video_submission_form', $args);
     }
 
     public function load_assets(){
