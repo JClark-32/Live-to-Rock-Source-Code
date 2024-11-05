@@ -1,150 +1,140 @@
 <?php
-/** 
+/**
  * Plugin Name: Life Performances Plugin
- * Description: Plugin for the LtR Life Performances Page
- * Authors:
+ * Description: Adds YT iframe embeds from user submissions on Life Performances page
+ * Authors: Live to Rock Capstone Team
  * Version: 0.1.0
  * Text Domain: life-performances-plugin
-*/
-if ( !defined('ABSPATH') ) 
-{
-    exit;
-}
+ */
 
-class LifePerformances{
+ // Prevent public user access to .php file
+ if ( !defined('ABSPATH') ) { exit; }
 
-    public function __construct(){
+ class LifePerformances {
+    // PROPERTIES
+    
+    // METHODS
+    public function __construct() {
+        // Load assets ----------
+        # Action hook WP calls when its time to load scripts & styles for front end
+        add_action('wp_enqueue_scripts', array( $this, 'load_assets' ) );
 
-        // Load assets
-        add_action('wp_enqueue_scripts', array( $this,'load_assets') );
+        // SHORTCODES ----------
+        # Creates a reusable block of HTML YT videos can be embedded into
+        add_shortcode('ltr-video-block', array( $this, 'load_video_block' ) );
+        # (previously 'life-performance' previously 'load_shortcode')
 
-        // Add shortcode
-        add_shortcode('life-performance', array( $this,'load_shortcode') );
+        # Creates a form for submitting a YT video URL to
+        add_shortcode('ltr-video-submission', array ( $this, 'load_video_submission') );
+        # (previously (same) previously 'load_videosubmission')
+        
+        // Load js ----------
+        # (add_action 'wp_footer', 'load_scripts' removed; unused, causes errors)
 
-        // Add submission shortcode
-        add_shortcode('video-submission', array( $this, 'load_videosubmission') );
+        # Nabs URL from submission and saves in database for later use
+        add_action('init', array( $this, 'video_id' ) );
 
-        //load javascript
-        //add_action('wp_footer', array($this, 'load_scripts'));
-
-        add_action('init', array($this,'video_id'));
-
-        add_action('init', array($this, 'show_videos'));
-
-
+        #
+        add_shortcode('ltr-videos', array ( $this, 'show_videos' ) );
+            
     }
 
-    public function load_assets(){
+    // create_video_submission() removed (used for rest api but no ref in code)
+
+    // Loads assets
+    # Nothing in this function is ever really used because our .css and .js files are empty
+    public function load_assets() {
+        # Loads css file (empty)
         wp_enqueue_style(
-            'LifePerformancesPlugin', 
+            'LifePerformancesPlugin',
             plugin_dir_url( __FILE__ ) . '/css/LifePerformancesPlugin.css',
             array(),
-            1 ,
+            1,
             'all'
         );
 
+        # Loads fs file (empty)
         wp_enqueue_script(
             'LifePerformancesPlugin',
             plugin_dir_url( __FILE__ ) . '/js/LifePerformancesPlugin.js',
             array(),
-            1 ,
+            1,
             'all'
         );
     }
 
-    public function load_videosubmission()
-    {?>
-        <div class="wp-block-uagb-container uagb-block-dc229f8f alignfull uagb-is-root-container"><div class="uagb-container-inner-blocks-wrap">
-            <div class="video-submission">
-                <h2>Post Your Life Performance?</h2>
-                <p>Paste a link to your video here</p>
+    // Loads a submission form that a user can paste a YT url which will be stored in database
+    public function load_video_submission() {
+        ?>
 
-                <form id="video-link" method="post">
-                    <div class="input">
-                        <input type="link" name="video-url" placeholder="YouTube link here" required>
-                    </div>
-                    <div class="submit">
-                        <button type="submit" name="submit-video" class="submit-btn">Submit</button>
-                    </div>
-                </form>
-            </div>
-        </div></div>
-    <?php }
-    
-    public function load_shortcode()
-    {?>
-        <div class = "form-group">
+        <div id="ltr-video-submission">
+            <h2>Post Your Life Performance?</h2>
+            <p>Paste YouTube URL here:</p>
+
+            <form id="ltr-video-link" method="post">
+                <div class="input">
+                    <input type="link" name="ltr-video-url" placeholder="YouTube URL" required>
+                </div>
+
+                <div id="ltr-submit">
+                    <button type="submit" name="ltr-submit-video-button" class="submit-btn">Submit!</button>
+                </div>
+            </form>
+
+        </div>
+
+        <?php
+    }
+
+    // TO-DO: needs to be fixed because why is there a set YT url here??
+    # (previously load_shortcode() )
+    public function load_video_block()
+    {
+        ?>
+
+        <div id="ltr-video-block" class="form-group">
             <div>
                 <iframe width="560" height="315" src="https://www.youtube.com/embed/j_S0upmiG7Q?si=ayY4EpAj1hDs7z6v" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
             </div>
         </div>
-    <?php }
 
-    //headers nodderrs
-
-    public function test_table(){
-        if (isset($_POST['submit-video'])){
-            Global $wpdb;
-            $table_name = "testing";
-            $charset_collate = $wpdb->get_charset_collate();
-
-
-            $sql = "CREATE TABLE IF NOT EXISTS video_submission(\n"
-
-                . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
-
-                . "    submission_text TEXT NOT NULL,\n"
-
-                . "    PRIMARY KEY(id)\n"
-
-                . ");";
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
-            dbDelta($sql);
-
-            if ($wpdb->last_error) {
-                echo "Error creating table: " . $wpdb->last_error;
-            } else {
-                echo "Table created successfully.";
-            }
-        }
+        <?php
     }
 
-    public function video_id()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['video-url'])) {
-            
-            if (isset($_POST['submit-video'])){
-                    $video_url = sanitize_text_field($_POST['video-url']);
-                }else{
-                    echo "No";
-                };
+    // test_table() removed
 
-                preg_match('/[\\?\\&]v=([^\\?\\&]+)/', $video_url, $matches);
-                $video_id = $matches[1];
+    public function video_id() {
+        global $wpdb;
 
-                global $wpdb;
+        // Checking to see if the request was made via post and if it was from the right spot
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ltr-video-url'])) {
 
-                if ($video_id){
-                    $table_name = $wpdb->prefix . 'video_submission';
+            // Checking again for a post call
+            if (isset($_POST['ltr-submit-video-button'])) {
+                $video_url = sanitize_text_field($_POST['ltr-video-url']);
+            } else {
+                echo "Error";
+            }
 
-                    //$charset_collate = $wpdb->get_charset_collate();
+            preg_match('/[\\?\\&]v=([^\\?\\&]+)/', $video_url, $matches);
+            $video_id = $matches[1];
 
-                    $sql = "CREATE TABLE IF NOT EXISTS $table_name(\n"
+            if ($video_id) { # if true
+                $table_name = $wpdb->prefix . 'video_submission';
 
-                    . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
+                // Create db table if doesn't already exist
+                $sql = "CREATE TABLE IF NOT EXISTS $table_name(\n"
+                . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
+                . "    submission_text VARCHAR(11) NOT NULL,\n"
+                . "    PRIMARY KEY(id)\n"
+                . ");";
+                
+                # ????
+                require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+                dbDelta($sql);
 
-                    . "    submission_text TEXT NOT NULL,\n"
-
-                    . "    PRIMARY KEY(id)\n"
-
-                    . ");";
-
-                    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-
-                    dbDelta( $sql );
-                    if (isset($_POST['submit-video'])){
-                    // Insert data into the table
+                if (isset($_POST['ltr-submit-video-button'])) {
+                    // Data is inserted into the created or existing table
                     $wpdb->insert(
                         $table_name,
                         array(
@@ -153,41 +143,45 @@ class LifePerformances{
                         NULL
                     );
                 }
-                    if ($wpdb->last_error) {
-                        echo "Error creating table: " . $wpdb->last_error;
-                    } else {
-                        echo "Table created successfully.";
-                    }
-                }
-                else{
-                    echo "Error, no video_id";
-                }
-                wp_redirect($_SERVER['REQUEST_URI']);
-                exit;
+
+                if ($wpdb->last_error) {
+                    echo "\nError creating table: " . $wpdb->last_error . "\nContact admin.";
+                } # Else statement removed so no text is outputted to site
+
+            } else {
+                echo "\nError: no video ID.";
             }
+
+            wp_redirect($_SERVER['REQUEST_URI']);
+            exit;
+        }
     }
 
-    public function show_videos()
-    {
-        Global $wpdb;
+    public function show_videos() {
+        global $wpdb;
         $table_name = $wpdb->prefix . 'video_submission';
-        
-        $video_ids = $wpdb->get_col("SELECT submission_text FROM $table_name");
 
-        echo '<div id="videos-here">';
-    
-        // div for each player
+        $video_ids = $wpdb->get_col("
+            SELECT submission_text
+            FROM $table_name"
+        );
+
+        // TO-DO: CHANGE THIS! This is why it's just going to the top of the page!!
+
+        # Opening tag -
+        echo '<div id="ltr-videos-here">';
+        # Middle bit -
         foreach ($video_ids as $index => $video_id) {
             echo "<div id='player$index' data-video-id='$video_id' class='youtube-player' loading='lazy'></div>";
         }
-
+        # Closing tag -
         echo '</div>';
 
         // Pass the video IDs to JavaScript
-        echo "<script>
-        var videoIds = " . json_encode($video_ids) . ";
-        </script>";
-        ?>
+        echo "<script> var videoIds = " . json_encode($video_ids) . "; </script>";
+        
+        # TO-DO: fix below code
+        ?> 
         <script>
             // Load the IFrame Player API asynchronously
             var tag = document.createElement('script');
@@ -207,16 +201,16 @@ class LifePerformances{
                         }
                     });
                 });
+
                 videoIds.forEach(videoId => {
                     console.log(videoId);
-                    document.write(videoId + "<br>");
+                    // document.write == BAD >:( so commented out for now
+                    // document.write(videoId + "<br>");
                 });
             }
         </script>
-        <?php 
+        <?php
     }
-
-
 }
 
 new LifePerformances();
