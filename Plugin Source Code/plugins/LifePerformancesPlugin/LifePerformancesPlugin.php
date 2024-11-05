@@ -94,6 +94,34 @@ class LifePerformances{
 
     //headers nodderrs
 
+    public function test_table(){
+        if (isset($_POST['submit-video'])){
+            Global $wpdb;
+            $table_name = "testing";
+            $charset_collate = $wpdb->get_charset_collate();
+
+
+            $sql = "CREATE TABLE IF NOT EXISTS video_submission(\n"
+
+                . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
+
+                . "    submission_text TEXT NOT NULL,\n"
+
+                . "    PRIMARY KEY(id)\n"
+
+                . ");";
+            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+            dbDelta($sql);
+
+            if ($wpdb->last_error) {
+                echo "Error creating table: " . $wpdb->last_error;
+            } else {
+                echo "Table created successfully.";
+            }
+        }
+    }
+
     public function video_id()
     {
         if (isset($_POST['submit-video'])){
@@ -112,13 +140,17 @@ class LifePerformances{
             if ($video_id){
                 $table_name = $wpdb->prefix . 'video_submission';
 
-                $charset_collate = $wpdb->get_charset_collate();
+                //$charset_collate = $wpdb->get_charset_collate();
 
-                $sql = "CREATE TABLE $table_name (
-                    id mediumsint(9) NOT NULL AUTO_INCREMENT,
-                    submission_text text NOT NULL,
-                    PRIMARY KEY (id)
-                ) $charset_collate;";
+                $sql = "CREATE TABLE IF NOT EXISTS $table_name(\n"
+
+                . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
+
+                . "    submission_text TEXT NOT NULL,\n"
+
+                . "    PRIMARY KEY(id)\n"
+
+                . ");";
 
                 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
@@ -129,12 +161,17 @@ class LifePerformances{
                     $table_name,
                     array(
                         'submission_text' => $video_id,
-                    )
+                    ),
+                    NULL
                 );
-
+                if ($wpdb->last_error) {
+                    echo "Error creating table: " . $wpdb->last_error;
+                } else {
+                    echo "Table created successfully.";
+                }
             }
             else{
-                echo "Nah";
+                echo "Error, no video_id";
             }
         }
         else{
