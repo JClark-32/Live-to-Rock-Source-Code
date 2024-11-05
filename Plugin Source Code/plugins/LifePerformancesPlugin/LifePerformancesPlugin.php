@@ -21,6 +21,30 @@ class LifePerformances{
         // Add shortcode
         add_shortcode('life-performance', array( $this,'load_shortcode') );
 
+        // Add submission shortcode
+        add_shortcode('video-submission', array( $this, 'load_videosubmission') );
+
+        //load javascript
+        add_action('wp_footer', array($this, 'load_scripts'));
+
+        add_action('rest_api_init', array($this, 'register_rest_api'));
+
+    }
+
+    public function create_video_submission(){
+        $args = array(
+            'public' => true,
+            'has_archive' => true,
+            'supports' => array('title'),
+            'exclude_from_search' => true,
+            'pulicly_queryable' => false,
+            'capability' => 'manage_options',
+            'labels' => array(
+                'name' => 'Life Performance',
+                'singular_name' => 'Share Your Music'
+            ),
+        );
+        register_post_type('video_submission_form', $args);
     }
 
 
@@ -46,6 +70,23 @@ class LifePerformances{
         );
     }
 
+    public function load_videosubmission()
+    {?>
+        <div class="video-submission">
+            <h2>Post Your Life Performance?</h2>
+            <p>Paste a link to your video here</p>
+
+            <form id="video-link">
+                <div class="input">
+                    <input type="link" placeholder="YouTube link here">
+                </div>
+                <div class="submit">
+                    <button type="submit" class="submit btn">Submit</button>
+                </div>
+            </form>
+        </div>
+    <?php }
+
     public function load_shortcode()
     {?>
         <div id = "video-group"class = "form-group">
@@ -54,6 +95,67 @@ class LifePerformances{
             </div>
         </div>
     <?php }
-}
 
+
+    public function load_scripts()
+        {?>
+
+            <script>
+
+            var nonce = '<?php echo wp_create_nonce('wp_rest');?>';
+
+                (function($){
+                    $('video-submission').submit(function(event){
+                    
+                        event.preventDefault();
+                        var form = $(this).serialize();
+
+                        $.ajax({
+
+                            method:"post",
+                            url: '<?php echo get_rest_url(null, 'video_submission/v1/link');?>'
+                            headers: {'X-WP-Nonce': nonce},
+                            data: form
+
+
+                        });
+                
+                });
+                })(jQuery)
+                
+            </script>
+
+        <?php }
+
+    public function register_rest_api()
+    {
+
+        register_rest_route('video_submission/v1', 'link', array(
+
+            'methods' => 'POST',
+            'callback' => array($this, 'handle_links')
+
+        ));
+
+    }
+
+    public function handle_links($data){
+        $headers = $data->get_headers();
+        $params = $data->get_params();
+        $nonce = $headers['x_wp_nonce'][0];
+
+        if(!wp_verify_nonce($nonce, 'wp_rest')){
+            return new WP_REST_Response('Message not sent', 422);
+        }
+
+        $post_id = wp_insert_post([
+            'post_type' => 'video_submission_form',
+            'post_title' => 'Submission enquiry',
+            'public_status' => 'Submit'
+        ]);
+        if ($post_id){
+            return new WP_REST_Response('Thank you for your submission', 200);
+        }
+    }
+}
 new LifePerformances();
