@@ -27,7 +27,8 @@ class LifePerformances{
         //load javascript
         add_action('wp_footer', array($this, 'load_scripts'));
 
-        add_action('rest_api_init', array($this, 'register_rest_api'));
+        add_action('init', array($this,'video_id'));
+
 
     }
 
@@ -47,7 +48,6 @@ class LifePerformances{
         register_post_type('video_submission_form', $args);
     }
 
-
     public function load_assets(){
         wp_enqueue_style(
             'LifePerformancesPlugin', 
@@ -57,16 +57,12 @@ class LifePerformances{
             'all'
         );
 
-        wp_enqueue_script('jquery', 'https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js', array(), null, true);
-
-        wp_enqueue_script('bootstrap-min-script', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js', array(), null, true);
-
         wp_enqueue_script(
             'LifePerformancesPlugin',
             plugin_dir_url( __FILE__ ) . '/js/LifePerformancesPlugin.js',
-            array('jquery'),
+            array(),
             1 ,
-            true
+            'all'
         );
     }
 
@@ -76,86 +72,77 @@ class LifePerformances{
             <h2>Post Your Life Performance?</h2>
             <p>Paste a link to your video here</p>
 
-            <form id="video-link">
+            <form id="video-link" method="post">
                 <div class="input">
-                    <input type="link" placeholder="YouTube link here">
+                    <input type="link" name="video-url" placeholder="YouTube link here" required>
                 </div>
                 <div class="submit">
-                    <button type="submit" class="submit btn">Submit</button>
+                    <button type="submit" name="submit-video" class="submit-btn">Submit</button>
                 </div>
             </form>
         </div>
     <?php }
-
+    
     public function load_shortcode()
     {?>
-        <div id = "video-group"class = "form-group">
+        <div class = "form-group">
             <div>
                 <iframe width="560" height="315" src="https://www.youtube.com/embed/j_S0upmiG7Q?si=ayY4EpAj1hDs7z6v" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
             </div>
         </div>
     <?php }
 
+    //headers nodderrs
 
-    public function load_scripts()
-        {?>
-
-            <script>
-
-            var nonce = '<?php echo wp_create_nonce('wp_rest');?>';
-
-                (function($){
-                    $('video-submission').submit(function(event){
-                    
-                        event.preventDefault();
-                        var form = $(this).serialize();
-
-                        $.ajax({
-
-                            method:"post",
-                            url: '<?php echo get_rest_url(null, 'video_submission/v1/link');?>'
-                            headers: {'X-WP-Nonce': nonce},
-                            data: form
-
-
-                        });
-                
-                });
-                })(jQuery)
-                
-            </script>
-
-        <?php }
-
-    public function register_rest_api()
+    public function video_id()
     {
+        if (isset($_POST['submit-video'])){
+            if (isset($_POST['video-url'])){
+                $video_url = sanitize_text_field($_POST['video-url']);
+                echo $video_url;
+            }else{
+                echo "No";
+            };
 
-        register_rest_route('video_submission/v1', 'link', array(
+            preg_match('/[\\?\\&]v=([^\\?\\&]+)/', $video_url, $matches);
+            $video_id = $matches[1];
 
-            'methods' => 'POST',
-            'callback' => array($this, 'handle_links')
+            global $wpdb;
 
-        ));
+            if ($video_id){
+                $table_name = $wpdb->prefix . 'video_submission';
 
-    }
+                $charset_collate = $wpdb->get_charset_collate();
 
-    public function handle_links($data){
-        $headers = $data->get_headers();
-        $params = $data->get_params();
-        $nonce = $headers['x_wp_nonce'][0];
+                $sql = "CREATE TABLE $table_name (
+                    id mediumsint(9) NOT NULL AUTO_INCREMENT,
+                    submission_text text NOT NULL,
+                    PRIMARY KEY (id)
+                ) $charset_collate;";
 
-        if(!wp_verify_nonce($nonce, 'wp_rest')){
-            return new WP_REST_Response('Message not sent', 422);
+                require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
+                dbDelta( $sql );
+
+                // Insert data into the table
+                $wpdb->insert(
+                    $table_name,
+                    array(
+                        'submission_text' => $video_id,
+                    )
+                );
+
+            }
+            else{
+                echo "Nah";
+            }
         }
-
-        $post_id = wp_insert_post([
-            'post_type' => 'video_submission_form',
-            'post_title' => 'Submission enquiry',
-            'public_status' => 'Submit'
-        ]);
-        if ($post_id){
-            return new WP_REST_Response('Thank you for your submission', 200);
+        else{
+            echo "Error, no button";
         }
-    }
 }
+
+
+}
+
 new LifePerformances();
