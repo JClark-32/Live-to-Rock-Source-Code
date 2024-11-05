@@ -177,7 +177,7 @@ class LifePerformances{
         else{
             echo "Error, no button";
         }
-}
+    }
 
 
 }
