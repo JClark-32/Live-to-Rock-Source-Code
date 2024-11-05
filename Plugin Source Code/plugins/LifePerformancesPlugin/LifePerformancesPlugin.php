@@ -29,6 +29,8 @@ class LifePerformances{
 
         add_action('init', array($this,'video_id'));
 
+        add_action('init', array($this, 'show_videos'));
+
 
     }
 
@@ -124,59 +126,112 @@ class LifePerformances{
 
     public function video_id()
     {
-        if (isset($_POST['submit-video'])){
-            if (isset($_POST['video-url'])){
-                $video_url = sanitize_text_field($_POST['video-url']);
-                echo $video_url;
-            }else{
-                echo "No";
-            };
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['video-url'])) {
+            
+            if (isset($_POST['submit-video'])){
+                    $video_url = sanitize_text_field($_POST['video-url']);
+                }else{
+                    echo "No";
+                };
 
-            preg_match('/[\\?\\&]v=([^\\?\\&]+)/', $video_url, $matches);
-            $video_id = $matches[1];
+                preg_match('/[\\?\\&]v=([^\\?\\&]+)/', $video_url, $matches);
+                $video_id = $matches[1];
 
-            global $wpdb;
+                global $wpdb;
 
-            if ($video_id){
-                $table_name = $wpdb->prefix . 'video_submission';
+                if ($video_id){
+                    $table_name = $wpdb->prefix . 'video_submission';
 
-                //$charset_collate = $wpdb->get_charset_collate();
+                    //$charset_collate = $wpdb->get_charset_collate();
 
-                $sql = "CREATE TABLE IF NOT EXISTS $table_name(\n"
+                    $sql = "CREATE TABLE IF NOT EXISTS $table_name(\n"
 
-                . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
+                    . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
 
-                . "    submission_text TEXT NOT NULL,\n"
+                    . "    submission_text TEXT NOT NULL,\n"
 
-                . "    PRIMARY KEY(id)\n"
+                    . "    PRIMARY KEY(id)\n"
 
-                . ");";
+                    . ");";
 
-                require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+                    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-                dbDelta( $sql );
-
-                // Insert data into the table
-                $wpdb->insert(
-                    $table_name,
-                    array(
-                        'submission_text' => $video_id,
-                    ),
-                    NULL
-                );
-                if ($wpdb->last_error) {
-                    echo "Error creating table: " . $wpdb->last_error;
-                } else {
-                    echo "Table created successfully.";
+                    dbDelta( $sql );
+                    if (isset($_POST['submit-video'])){
+                    // Insert data into the table
+                    $wpdb->insert(
+                        $table_name,
+                        array(
+                            'submission_text' => $video_id,
+                        ),
+                        NULL
+                    );
                 }
+                    if ($wpdb->last_error) {
+                        echo "Error creating table: " . $wpdb->last_error;
+                    } else {
+                        echo "Table created successfully.";
+                    }
+                }
+                else{
+                    echo "Error, no video_id";
+                }
+                wp_redirect($_SERVER['REQUEST_URI']);
+                exit;
             }
             else{
-                echo "Error, no video_id";
+                echo "Error, no button";
             }
+    }
+
+    public function show_videos()
+    {
+        Global $wpdb;
+        $table_name = $wpdb->prefix . 'video_submission';
+        
+        $video_ids = $wpdb->get_col("SELECT submission_text FROM $table_name");
+
+        echo '<div id="videos-here">';
+    
+        // div for each player
+        foreach ($video_ids as $index => $video_id) {
+            echo "<div id='player$index' data-video-id='$video_id' class='youtube-player' loading='lazy'></div>";
         }
-        else{
-            echo "Error, no button";
-        }
+
+        echo '</div>';
+
+        // Pass the video IDs to JavaScript
+        echo "<script>
+        var videoIds = " . json_encode($video_ids) . ";
+        </script>";
+        ?>
+        <script>
+            // Load the IFrame Player API asynchronously
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+            // Creates an <iframe> (and YouTube player) for each video after the API code downloads
+            function onYouTubeIframeAPIReady() {
+                videoIds.forEach((vidId, index) => {
+                    new YT.Player(`player${index}`, {
+                        height: '390',
+                        width: '640',
+                        videoId: vidId,
+                        playerVars: {
+                            'playsinline': 1
+                        }
+                    });
+                });
+                videoIds.forEach(videoId => {
+                    console.log(videoId);
+                    document.write(videoId + "<br>");
+                });
+            }
+        </script>
+        <?php 
+        echo "I'm a liar and don't work";
     }
 
 
