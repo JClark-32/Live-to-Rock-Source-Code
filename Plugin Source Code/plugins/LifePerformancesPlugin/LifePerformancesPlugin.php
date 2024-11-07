@@ -11,6 +11,7 @@
  if ( !defined('ABSPATH') ) { exit; }
 
  class LifePerformances {
+
     // PROPERTIES
     
     // METHODS
@@ -20,10 +21,6 @@
         add_action('wp_enqueue_scripts', array( $this, 'load_assets' ) );
 
         // SHORTCODES ----------
-        # Creates a reusable block of HTML YT videos can be embedded into
-        add_shortcode('ltr-video-block', array( $this, 'load_video_block' ) );
-        # (previously 'life-performance' previously 'load_shortcode')
-
         # Creates a form for submitting a YT video URL to
         add_shortcode('ltr-video-submission', array ( $this, 'load_video_submission') );
         # (previously (same) previously 'load_videosubmission')
@@ -62,45 +59,27 @@
             'all'
         );
     }
-
+    
     // Loads a submission form that a user can paste a YT url which will be stored in database
     public function load_video_submission() {
-        ?>
-
+    ob_start();
+    ?>
         <div id="ltr-video-submission">
             <h2>Post Your Life Performance?</h2>
             <p>Paste YouTube URL here:</p>
-
             <form id="ltr-video-link" method="post">
                 <div class="input">
-                    <input type="link" name="ltr-video-url" placeholder="YouTube URL" required>
+                    <input type="url" name="ltr-video-url" placeholder="YouTube URL" required>
                 </div>
-
                 <div id="ltr-submit">
                     <button type="submit" name="ltr-submit-video-button" class="submit-btn">Submit!</button>
                 </div>
             </form>
-
         </div>
-
         <?php
+    return ob_get_clean();
     }
-
-    // TO-DO: needs to be fixed because why is there a set YT url here??
-    # (previously load_shortcode() )
-    public function load_video_block()
-    {
-        ?>
-
-        <div id="ltr-video-block" class="form-group">
-            <div>
-                <iframe width="560" height="315" src="https://www.youtube.com/embed/j_S0upmiG7Q?si=ayY4EpAj1hDs7z6v" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-            </div>
-        </div>
-
-        <?php
-    }
-
+    
     // test_table() removed
 
     public function video_id() {
@@ -156,9 +135,9 @@
             exit;
         }
     }
-
     public function show_videos() {
         global $wpdb;
+        ob_start();
         $table_name = $wpdb->prefix . 'video_submission';
 
         $video_ids = $wpdb->get_col("
@@ -210,7 +189,9 @@
             }
         </script>
         <?php
+        return ob_get_clean();
     }
+    
 }
 
 new LifePerformances();
