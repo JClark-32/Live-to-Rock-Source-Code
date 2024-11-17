@@ -172,8 +172,8 @@
             function onYouTubeIframeAPIReady() {
                 videoIds.forEach((vidId, index) => {
                     new YT.Player(`player${index}`, {
-                        height: '390',
-                        width: '640',
+                        height: '313',
+                        width: '556',
                         videoId: vidId,
                         playerVars: {
                             'playsinline': 1
