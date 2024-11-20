@@ -12,9 +12,17 @@
 
  Class JamSession{
     public function __construct(){
-        add_shortcode('ltr-blog-submission', array( $this,'load_blog_submission') );
+        add_shortcode('ltr-blog-submission', array( $this,'empty_blog_submission') );
         add_shortcode('ltr-blogs', array( $this,'show_blogs') );
+        add_action('plugins_loaded', array( $this,'wporg_add_submit_post_ability') );
         #add_action('init', array( $this,'blog_id') );
+    }
+
+    public function empty_blog_submission(){
+        ob_start();
+        ?>
+        <?php
+        return ob_get_clean();
     }
 
     public function load_blog_submission(){
@@ -45,6 +53,15 @@
     }
     */
 
+    #Adds the ability to see the video sumbissions to users that are above the editor user permissions
+    function wporg_add_submit_post_ability() {
+        if ( current_user_can('edit_others_posts')){
+            remove_shortcode('ltr-blog-submission');
+            add_shortcode('ltr-blog-submission', array( $this,'load_blog_submission') );
+        }
+    }
+
+
     public function show_blogs( ){
         global $wpdb;
         ob_start();
@@ -54,6 +71,15 @@
             SELECT post_text
             FROM $table_name"
         );
+
+        echo '<div id="ltr-blogs-here">';
+        foreach ($blog_text as $index => $blog_text) {
+            echo "<div id='post$index' data-blog-text='$blog_text' class='blog-post' loading='lazy'></div>";
+            }
+            # code...
+            echo '</div>';
+        return ob_get_clean();
     }
+    
 }
  new JamSession();
