@@ -11,6 +11,16 @@
  if ( !defined('ABSPATH') ) { exit; }
 
  Class JamSession{
+    public function __construct(){
+        add_shortcode('ltr-blog', array( $this,'show_blogs') );
+    }
 
- }
+    public function show_blogs(){
+    ob_start();
+    ?>
+    
+    <?php
+    return ob_get_clean();
+    }
+}
  new JamSession();
