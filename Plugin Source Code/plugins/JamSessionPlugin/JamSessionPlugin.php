@@ -12,11 +12,12 @@
 
  Class JamSession{
     public function __construct(){
-        add_shortcode('ltr-blog', array( $this,'show_blogs') );
+        add_shortcode('ltr-blog-submission', array( $this,'load_blog_submission') );
+        add_shortcode('ltr-blogs', array( $this,'show_blogs') );
         #add_action('init', array( $this,'blog_id') );
     }
 
-    public function show_blogs(){
+    public function load_blog_submission(){
     ob_start();
     ?>
         <div id="ltr-blog-submission">
@@ -25,6 +26,9 @@
             <form id="ltr-blog-post" method="post">
                 <div class="input">
                     <textarea name="ltr-blog-text"placeholder="Enter Text" required cols="80" rows = "6"></textarea>
+                </div>
+                <div id="ltr-submit">
+                    <button type="submit" name="ltr-post-blog-button" class="submit-btn">Post!</button>
                 </div>
             </form>
         </div>
@@ -40,5 +44,16 @@
         }
     }
     */
+
+    public function show_blogs( ){
+        global $wpdb;
+        ob_start();
+        $table_name = $wpdb->prefix .'blog_post';
+
+        $blog_text = $wpdb->get_col("
+            SELECT post_text
+            FROM $table_name"
+        );
+    }
 }
  new JamSession();
