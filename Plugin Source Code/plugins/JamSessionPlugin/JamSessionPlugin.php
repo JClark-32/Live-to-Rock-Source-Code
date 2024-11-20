@@ -19,8 +19,14 @@
     public function show_blogs(){
     ob_start();
     ?>
-        <div>
-            <h2>test</h2>
+        <div id="ltr-blog-submission">
+            <h2>Post a new blog?</h2>
+            <p>Add blog text here</p>
+            <form id="ltr-blog-post" method="post">
+                <div class="input">
+                    <textarea name="ltr-blog-text"placeholder="Enter Text" required cols="80" rows = "6"></textarea>
+                </div>
+            </form>
         </div>
     <?php
     return ob_get_clean();
