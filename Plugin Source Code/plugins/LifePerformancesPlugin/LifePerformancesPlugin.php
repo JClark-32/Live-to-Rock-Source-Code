@@ -22,7 +22,7 @@
 
         // SHORTCODES ----------
         # Creates a form for submitting a YT video URL to
-        add_shortcode('ltr-video-submission', array ( $this, 'load_video_submission') );
+        add_shortcode('ltr-video-submission', array ( $this, 'blank_video_submission') );
         # (previously (same) previously 'load_videosubmission')
         
         // Load js ----------
@@ -33,7 +33,9 @@
 
         #
         add_shortcode('ltr-videos', array ( $this, 'show_videos' ) );
-            
+
+        # Action to call the user capabilities check
+        add_action('plugins_loaded', array( $this,'wporg_add_video_submission_ability') );
     }
 
     // create_video_submission() removed (used for rest api but no ref in code)
@@ -60,6 +62,14 @@
         );
     }
     
+    // Loads a blank sections that users that do not have the permission to post videos see
+    public function blank_video_submission(){
+        ob_start();
+        ?>
+        <?php
+        ob_get_clean();
+    }
+
     // Loads a submission form that a user can paste a YT url which will be stored in database
     public function load_video_submission() {
     ob_start();
@@ -80,6 +90,13 @@
     return ob_get_clean();
     }
     
+    // Changes the shortcode to show the video submission if the user can edit posts, i.e. Editor and above
+    function wporg_add_video_submission_ability() {
+        if ( current_user_can('edit_others_posts')){
+            remove_shortcode('ltr-video-submission');
+            add_shortcode('ltr-video-submission', array( $this,'load_video_submission') );
+        }
+    }
     // test_table() removed
 
     public function video_id() {
