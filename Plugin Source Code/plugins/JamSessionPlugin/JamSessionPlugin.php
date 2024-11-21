@@ -46,7 +46,7 @@
     <?php
     return ob_get_clean();
     }
-    
+
     public function blog_id(){
         global $wpdb;
 
@@ -78,7 +78,7 @@
             $current_user = wp_get_current_user();
             $username = $current_user->user_login;
 
-            if (isset($_POST['ltr-post-blog-butotn'])) {
+            if (isset($_POST['ltr-post-blog-button'])) {
                 // insert data
                 $wpdb->insert(
                     $table_name,
