@@ -33,6 +33,9 @@
             <p>Add blog text here</p>
             <form id="ltr-blog-post" method="post">
                 <div class="input">
+                    <div name="title">
+                        <input type="text">
+                    </div>
                     <textarea name="ltr-blog-text"placeholder="Enter Text" required cols="80" rows = "6"></textarea>
                 </div>
                 <div id="ltr-submit">
@@ -53,7 +56,7 @@
     }
     */
 
-    #Adds the ability to see the video sumbissions to users that are above the editor user permissions
+    #Adds the ability to see the video sumbission entry box to users that are above the editor user permissions
     function wporg_add_submit_post_ability() {
         if ( current_user_can('edit_others_posts')){
             remove_shortcode('ltr-blog-submission');
@@ -80,6 +83,6 @@
             echo '</div>';
         return ob_get_clean();
     }
-    
+
 }
  new JamSession();
