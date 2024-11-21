@@ -46,6 +46,7 @@
     <?php
     return ob_get_clean();
     }
+    
     public function blog_id(){
         global $wpdb;
 
@@ -59,6 +60,43 @@
             } else {
                 echo "Error";
             }
+
+            $table_name = $wpdb->prefix . 'blog_post';
+
+            $sql = "CREATE TABLE IF NOT EXISTS $table_name(\n"
+            . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
+            . "    user_posted VARCHAR(60) NOT NULL,\n"
+            . "    date_posted DATETIME DEFAULT CURRENT_TIMESTAMP,\n"
+            . "    blog_title TEXT NOT NULL,\n"
+            . "    blog_text TEXT NOT NULL,\n"
+            . "    PRIMARY KEY(id)"
+            . ");";
+
+            require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+            dbDelta($sql);
+
+            $current_user = wp_get_current_user();
+            $username = $current_user->user_login;
+
+            if (isset($_POST['ltr-post-blog-butotn'])) {
+                // insert data
+                $wpdb->insert(
+                    $table_name,
+                    array(
+                        'user_posted' => $username,
+                        'blog_title' => $blog_title,
+                        'blog_text' => $blog_text
+                    ),
+                    NULL
+                );
+            }
+
+            if ($wpdb->last_error) {
+                echo "\nError creating table " . $wpdb->last_error . "\nContact admin.";
+            }
+
+            wp_redirect($_SERVER['REQUEST_URI']);
+            exit;
 
         }
     }
