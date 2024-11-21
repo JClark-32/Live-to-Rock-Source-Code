@@ -34,7 +34,7 @@
             <form id="ltr-blog-post" method="post">
                 <div class="input">
                     <div name="title">
-                        <input type="text">
+                        <input name="ltr-title-text" type="text">
                     </div>
                     <textarea name="ltr-blog-text"placeholder="Enter Text" required cols="80" rows = "6"></textarea>
                 </div>
@@ -46,15 +46,22 @@
     <?php
     return ob_get_clean();
     }
-
-    /*
     public function blog_id(){
         global $wpdb;
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST[''])){
+        // check if request was made & if from correct spot
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ltr-blog-submission'])) {
+
+            // check again for post call
+            if (isset($_POST['ltr-post-blog-button'])) {
+                $blog_title = sanitize_text_field($_POST['ltr-title-text']);
+                $blog_text = sanitize_text_field($_POST['ltr-blog-text']);
+            } else {
+                echo "Error";
+            }
+
         }
     }
-    */
 
     #Adds the ability to see the video sumbission entry box to users that are above the editor user permissions
     function wporg_add_submit_post_ability() {
