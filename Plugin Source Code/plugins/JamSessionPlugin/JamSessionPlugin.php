@@ -87,7 +87,11 @@
                         'blog_title' => $blog_title,
                         'blog_text' => $blog_text
                     ),
-                    NULL
+                    array(
+                        '%s', // user_posted
+                        '%s', // blog_title
+                        '%s'  // blog_text
+                    )
                 );
             }
 
