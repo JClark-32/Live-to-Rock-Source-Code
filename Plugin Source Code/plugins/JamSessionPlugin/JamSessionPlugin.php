@@ -15,7 +15,7 @@
         add_shortcode('ltr-blog-submission', array( $this,'empty_blog_submission') );
         add_shortcode('ltr-blogs', array( $this,'show_blogs') );
         add_action('plugins_loaded', array( $this,'wporg_add_submit_post_ability') );
-        #add_action('init', array( $this,'blog_id') );
+        add_action('init', array( $this,'blog_id') );
     }
 
     public function empty_blog_submission(){
@@ -51,7 +51,7 @@
         global $wpdb;
 
         // check if request was made & if from correct spot
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ltr-blog-submission'])) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST'  && isset($_POST['ltr-blog-text'])) {
 
             // check again for post call
             if (isset($_POST['ltr-post-blog-button'])) {
