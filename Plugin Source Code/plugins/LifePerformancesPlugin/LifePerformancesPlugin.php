@@ -129,20 +129,21 @@
                 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
                 dbDelta($sql);
 
+                $already_exists = "SELECT * FROM `wp_video_submission` WHERE EXISTS (SELECT * FROM submission_text = \'$video_id\';)";
+
                 if (isset($_POST['ltr-submit-video-button'])) {
                     // Data is inserted into the created or existing table
                     $wpdb->insert(
-                        $table_name,
-                        array(
-                            'submission_text' => $video_id,
-                        ),
-                        NULL
-                    );
+                    $table_name,
+                    array(
+                        'submission_text' => $video_id,
+                    ),
+                    NULL
+                    );  
                 }
-
                 if ($wpdb->last_error) {
                     echo "\nError creating table: " . $wpdb->last_error . "\nContact admin.";
-                } # Else statement removed so no text is outputted to site
+                }
 
             } else {
                 echo "\nError: no video ID.";
@@ -152,6 +153,7 @@
             exit;
         }
     }
+
     public function show_videos() {
         global $wpdb;
         ob_start();
@@ -168,7 +170,10 @@
         echo '<div id="ltr-videos-here">';
         # Middle bit -
         foreach ($video_ids as $index => $video_id) {
-            echo "<div id='player$index' data-video-id='$video_id' class='youtube-player' loading='lazy'></div>";
+            echo "<div id='ltr-video$index'>";
+                echo "<div id='player$index' data-video-id='$video_id' class='youtube-player' loading='lazy'></div>";
+                echo "<button id='deleteButton$index' name='ltr-delBtn' class='deleteBtn' onclick='removeVideo(player$index, deleteButton$index)'>Delete?</button>";
+            echo '</div>';
         }
         # Closing tag -
         echo '</div>';
@@ -204,11 +209,14 @@
                     // document.write(videoId + "<br>");
                 });
             }
+            function removeVideo(video, button){
+                video.remove();
+                button.remove();
+            }
         </script>
         <?php
         return ob_get_clean();
     }
-    
 }
 
 new LifePerformances();
