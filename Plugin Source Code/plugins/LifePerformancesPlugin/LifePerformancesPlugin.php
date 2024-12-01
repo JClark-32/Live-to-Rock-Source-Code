@@ -31,6 +31,8 @@
         # Nabs URL from submission and saves in database for later use
         add_action('init', array( $this, 'video_id' ) );
 
+        add_shortcode('ltr-delete-video', array( $this, 'delete_videos' ) );
+
         #
         add_shortcode('ltr-videos', array ( $this, 'show_videos' ) );
 
@@ -154,6 +156,50 @@
         }
     }
 
+    public function delete_videos() {
+        global $wpdb;
+    
+        // Start output buffering
+        ob_start();
+    
+        // Check if the request method is POST and videoInput is set
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['ltr-delBtn'])) {
+    
+            // Check if 'videoInput' exists in the POST data
+            if (isset($_POST['videoInput'])) {
+                // Sanitize the input
+                $video_id = sanitize_text_field($_POST['videoInput']);
+                
+                // Log the video ID for further debugging
+                error_log("Deleting video ID: " . $video_id);  // Log to PHP error log for further review
+                
+                // SQL Query to delete the video from the database
+                $table_name = $wpdb->prefix . 'video_submission';
+                $sql = $wpdb->prepare(
+                    "DELETE FROM $table_name WHERE submission_text = %s", 
+                    $video_id
+                );
+    
+                // Execute the query
+                $wpdb->query($sql);
+    
+                // Check for any SQL errors
+                if ($wpdb->last_error) {
+                    error_log("Error deleting video: " . $wpdb->last_error);
+                } else {
+                    error_log("Video successfully deleted with ID: " . $video_id);
+                }
+            } else {
+                // If 'videoInput' is not set, log that as well
+                error_log("No videoInput received in the request.");
+            }
+        }
+        ob_get_clean();
+        // After debugging, perform the redirect
+        wp_redirect($_SERVER['REQUEST_URI']);
+        exit;
+    }
+
     public function show_videos() {
         global $wpdb;
         ob_start();
@@ -168,14 +214,18 @@
 
         # Opening tag -
         echo '<div id="ltr-videos-here">';
-        # Middle bit -
+        echo "<form id='video-posted' method='POST'>";
+
+        #Middle bit
         foreach ($video_ids as $index => $video_id) {
-            echo "<div id='ltr-video$index'>";
-                echo "<div id='player$index' data-video-id='$video_id' class='youtube-player' loading='lazy'></div>";
-                echo "<button id='deleteButton$index' name='ltr-delBtn' class='deleteBtn' onclick='removeVideo(player$index, deleteButton$index)'>Delete?</button>";
-            echo '</div>';
+            echo "<div id='player$index' data-video-id='$video_id' class='youtube-player' loading='lazy'></div>";
+            echo "<input type='hidden' name='videoInput' value='$video_id'>"; // Pass video ID to delete
+            echo "<button id='deleteButton$index' type='submit' name='ltr-delBtn' class='deleteBtn'>Delete?</button>";
+            echo "<br>";
         }
-        # Closing tag -
+
+        #Closing tags
+        echo "</form>";
         echo '</div>';
 
         // Pass the video IDs to JavaScript
@@ -208,10 +258,6 @@
                     // document.write == BAD >:( so commented out for now
                     // document.write(videoId + "<br>");
                 });
-            }
-            function removeVideo(video, button){
-                video.remove();
-                button.remove();
             }
         </script>
         <?php
