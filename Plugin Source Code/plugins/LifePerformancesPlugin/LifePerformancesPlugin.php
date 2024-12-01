@@ -53,15 +53,6 @@
             1,
             'all'
         );
-
-        # Loads fs file (empty)
-        wp_enqueue_script(
-            'LifePerformancesPlugin',
-            plugin_dir_url( __FILE__ ) . '/js/LifePerformancesPlugin.js',
-            array(),
-            1,
-            'all'
-        );
     }
     
     // Loads a blank sections that users that do not have the permission to post videos see
@@ -175,8 +166,10 @@
                 
                 // SQL Query to delete the video from the database
                 $table_name = $wpdb->prefix . 'video_submission';
+    
+                // Prepare the SQL query for deletion, ensuring it's safe
                 $sql = $wpdb->prepare(
-                    "DELETE FROM $table_name WHERE submission_text = %s", 
+                    "DELETE FROM $table_name WHERE submission_text = %s",  // Use %s for string data type
                     $video_id
                 );
     
@@ -194,11 +187,13 @@
                 error_log("No videoInput received in the request.");
             }
         }
-        ob_get_clean();
-        // After debugging, perform the redirect
+    
+        ob_get_clean();  // Clean up the output buffer
+        // After debugging, perform the redirect to refresh the page
         wp_redirect($_SERVER['REQUEST_URI']);
         exit;
     }
+    
 
     public function show_videos() {
         global $wpdb;
