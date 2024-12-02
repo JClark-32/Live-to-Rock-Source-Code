@@ -34,7 +34,7 @@
             <form id="ltr-blog-post" method="post">
                 <div class="input">
                     <div name="title">
-                        <input name="ltr-title-text" type="text">
+                        <input name="ltr-title-text" type="text" placeholder="Enter Title">
                     </div>
                     <textarea name="ltr-blog-text"placeholder="Enter Text" required cols="80" rows = "6"></textarea>
                 </div>
@@ -162,11 +162,17 @@
 
         ?>
         <script>
+            blogTexts.reverse()
+            blogTitles.reverse()
+            userNames.reverse()
+            datesPosted.reverse()
+
             blogTexts.forEach(blogText => {
                 var blogTitle = blogTitles[blogTexts.indexOf(blogText)]
                 var userName = userNames[blogTexts.indexOf(blogText)]
                 var datePosted = datesPosted[blogTexts.indexOf(blogText)]
 
+                document.write("<hr>")
                 document.write("<div>")
                 document.write("<h2>" + blogTitle + " </h2>")
                 document.write("<label>" + userName +"</label>")
@@ -176,10 +182,6 @@
                 
                 console.log(blogTitle);
                 
-
-                if (blogTexts.indexOf(blogText) != blogTexts.length-1){
-                    document.write("<hr>")
-                }
             });
         </script>
         <?php
