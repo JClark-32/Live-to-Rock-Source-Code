@@ -186,12 +186,15 @@
                 // If 'videoInput' is not set, log that as well
                 error_log("No videoInput received in the request.");
             }
+            // After debugging, perform the redirect to refresh the page
+            header("Refresh: 0");
+
         }
     
         ob_get_clean();  // Clean up the output buffer
-        // After debugging, perform the redirect to refresh the page
-        wp_redirect($_SERVER['REQUEST_URI']);
-        exit;
+
+        
+        
     }
     
 
