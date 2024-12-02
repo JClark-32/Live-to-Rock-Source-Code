@@ -119,17 +119,61 @@
         ob_start();
         $table_name = $wpdb->prefix .'blog_post';
 
-        $blog_text = $wpdb->get_col("
-            SELECT post_text
+        $blog_texts = $wpdb->get_col("
+            SELECT blog_text
+            FROM $table_name"
+        );
+        
+        $blog_titles = $wpdb->get_col("
+            SELECT blog_title
+            FROM $table_name"
+        );
+
+        $user_names = $wpdb->get_col("
+            SELECT user_posted
             FROM $table_name"
         );
 
         echo '<div id="ltr-blogs-here">';
-        foreach ($blog_text as $index => $blog_text) {
+
+        foreach ($blog_texts as $index => $blog_text) {
             echo "<div id='post$index' data-blog-text='$blog_text' class='blog-post' loading='lazy'></div>";
-            }
-            # code...
-            echo '</div>';
+        }
+        foreach ($blog_titles as $index => $blog_title) {
+            echo "<div id='post$index' data-blog-title='$blog_title' class='blog-post' loading='lazy'></div>";
+        }        
+        foreach ($user_names as $index => $user_name) {
+            echo "<div id='post$index' data-blog-title='$user_name' class='blog-post' loading='lazy'></div>";
+        }        
+        # code...
+        echo '</div>';
+
+        echo "<script> var blogTexts = " . json_encode($blog_texts) . "; </script>";
+        echo "<script> var blogTitles = " . json_encode($blog_titles) . "; </script>";
+        echo "<script> var userNames = " . json_encode($user_names) . "; </script>";
+        
+        ?>
+        <script>
+            blogTexts.forEach(blogText => {
+                var blogTitle = blogTitles[blogTexts.indexOf(blogText)]
+                var userName = userNames[blogTexts.indexOf(blogText)]
+                
+                document.write("<div>")
+                document.write("<div align = 'right'><label>" + userName +"</label></div>")
+                document.write("<h2>" + blogTitle + " </h2>")
+                document.write("<p>" + blogText + "</p>")
+                document.write("</div>")
+                
+                console.log(blogTitle);
+                
+
+                if (blogTexts.indexOf(blogText) != blogTexts.length-1){
+                    document.write("<hr>")
+                }
+            });
+        </script>
+        <?php
+
         return ob_get_clean();
     }
 
