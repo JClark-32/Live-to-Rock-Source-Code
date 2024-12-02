@@ -134,6 +134,11 @@
             FROM $table_name"
         );
 
+        $dates_posted = $wpdb->get_col("
+            SELECT date_posted
+            FROM $table_name"
+        );
+
         echo '<div id="ltr-blogs-here">';
 
         foreach ($blog_texts as $index => $blog_text) {
@@ -145,22 +150,27 @@
         foreach ($user_names as $index => $user_name) {
             echo "<div id='post$index' data-blog-title='$user_name' class='blog-post' loading='lazy'></div>";
         }        
-        # code...
+        foreach ($dates_posted as $index => $date) {
+            echo "<div id='post$index' data-blog-title='$date' class='blog-post' loading='lazy'></div>";
+        }        
         echo '</div>';
 
         echo "<script> var blogTexts = " . json_encode($blog_texts) . "; </script>";
         echo "<script> var blogTitles = " . json_encode($blog_titles) . "; </script>";
         echo "<script> var userNames = " . json_encode($user_names) . "; </script>";
-        
+        echo "<script> var datesPosted = " . json_encode($dates_posted) . "; </script>";
+
         ?>
         <script>
             blogTexts.forEach(blogText => {
                 var blogTitle = blogTitles[blogTexts.indexOf(blogText)]
                 var userName = userNames[blogTexts.indexOf(blogText)]
-                
+                var datePosted = datesPosted[blogTexts.indexOf(blogText)]
+
                 document.write("<div>")
-                document.write("<div align = 'right'><label>" + userName +"</label></div>")
                 document.write("<h2>" + blogTitle + " </h2>")
+                document.write("<label>" + userName +"</label>")
+                document.write("<p style='color:gray'><small>"+datePosted+"</small></p>")
                 document.write("<p>" + blogText + "</p>")
                 document.write("</div>")
                 
