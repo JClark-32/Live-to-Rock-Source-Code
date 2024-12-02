@@ -22,7 +22,7 @@
 
         // SHORTCODES ----------
         # Creates a form for submitting a YT video URL to
-        add_shortcode('ltr-video-submission', array ( $this, 'blank_video_submission') );
+        add_shortcode('ltr-video-submission', array ( $this, 'blank_shortcode') );
         # (previously (same) previously 'load_videosubmission')
         
         // Load js ----------
@@ -31,7 +31,7 @@
         # Nabs URL from submission and saves in database for later use
         add_action('init', array( $this, 'video_id' ) );
 
-        add_shortcode('ltr-delete-video', array( $this, 'delete_videos' ) );
+        add_shortcode('ltr-delete-video', array( $this, 'blank_shortcode' ) );
 
         #
         add_shortcode('ltr-videos', array ( $this, 'show_videos' ) );
@@ -56,7 +56,7 @@
     }
     
     // Loads a blank sections that users that do not have the permission to post videos see
-    public function blank_video_submission(){
+    public function blank_shortcode(){
         ob_start();
         ?>
         <?php
@@ -86,11 +86,12 @@
     // Changes the shortcode to show the video submission if the user can edit posts, i.e. Editor and above
     function wporg_add_video_submission_ability() {
         if ( current_user_can('edit_others_posts')){
+            remove_shortcode('ltr-delete-video');
+            add_shortcode('ltr-delete-video', array($this, 'delete_videos'));
             remove_shortcode('ltr-video-submission');
             add_shortcode('ltr-video-submission', array( $this,'load_video_submission') );
         }
     }
-    // test_table() removed
 
     public function video_id() {
         global $wpdb;
@@ -108,7 +109,7 @@
             preg_match('/[\\?\\&]v=([^\\?\\&]+)/', $video_url, $matches);
             $video_id = $matches[1];
 
-            if ($video_id) { # if true
+            if ($video_id) {
                 $table_name = $wpdb->prefix . 'video_submission';
 
                 // Create db table if doesn't already exist
@@ -162,19 +163,16 @@
                 $video_id = sanitize_text_field($_POST['videoInput']);
                 
                 // Log the video ID for further debugging
-                error_log("Deleting video ID: " . $video_id);  // Log to PHP error log for further review
-                
-                // SQL Query to delete the video from the database
+                error_log("Deleting video ID: " . $video_id);
+
                 $table_name = $wpdb->prefix . 'video_submission';
     
-                // Prepare the SQL query for deletion, ensuring it's safe
-                $sql = $wpdb->prepare(
-                    "DELETE FROM $table_name WHERE submission_text = %s",  // Use %s for string data type
-                    $video_id
-                );
-    
                 // Execute the query
-                $wpdb->query($sql);
+                $wpdb->query($wpdb->prepare(
+                    "DELETE FROM $table_name 
+                    WHERE submission_text = %s",
+                    $video_id
+                ));
     
                 // Check for any SQL errors
                 if ($wpdb->last_error) {
@@ -186,15 +184,10 @@
                 // If 'videoInput' is not set, log that as well
                 error_log("No videoInput received in the request.");
             }
-            // After debugging, perform the redirect to refresh the page
-            header("Refresh: 0");
-
+            wp_redirect(add_query_arg('message', 'video_deleted', wp_get_referer()));
+            exit;
         }
-    
-        ob_get_clean();  // Clean up the output buffer
-
-        
-        
+        ob_get_clean();
     }
     
 
@@ -212,24 +205,24 @@
 
         # Opening tag -
         echo '<div id="ltr-videos-here">';
-        echo "<form id='video-posted' method='POST'>";
+        
 
         #Middle bit
         foreach ($video_ids as $index => $video_id) {
+            echo "<form id='video-posted$index' method='POST'>";
             echo "<div id='player$index' data-video-id='$video_id' class='youtube-player' loading='lazy'></div>";
             echo "<input type='hidden' name='videoInput' value='$video_id'>"; // Pass video ID to delete
             echo "<button id='deleteButton$index' type='submit' name='ltr-delBtn' class='deleteBtn'>Delete?</button>";
             echo "<br>";
+            echo "</form>";
         }
 
         #Closing tags
-        echo "</form>";
         echo '</div>';
 
         // Pass the video IDs to JavaScript
         echo "<script> var videoIds = " . json_encode($video_ids) . "; </script>";
         
-        # TO-DO: fix below code
         ?> 
         <script>
             // Load the IFrame Player API asynchronously
