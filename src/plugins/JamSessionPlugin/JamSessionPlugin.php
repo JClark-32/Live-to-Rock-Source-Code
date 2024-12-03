@@ -118,8 +118,7 @@
     }
 
 
-  
-    public function show_blogs( ){
+    public function show_blogs(){
         global $wpdb;
         ob_start();
         $table_name = $wpdb->prefix .'blog_post';
