@@ -1,9 +1,7 @@
 <?php
-
 use PHPUnit\Framework\TestCase;
 
-require_once 'src/bootstrap.php';
-require_once 'src/plugins/LifePerformancesPlugin/LifePerformancesPlugin.php';
+require_once 'src\LifePerformancesPlugin.php';
 
 class LifePerformancesTest extends TestCase
 {
