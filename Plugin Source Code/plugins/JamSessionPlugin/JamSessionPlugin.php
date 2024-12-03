@@ -11,20 +11,24 @@
  if ( !defined('ABSPATH') ) { exit; }
 
  Class JamSession{
+
+    //Constructer classes that initialize functions
     public function __construct(){
-        add_shortcode('ltr-blog-submission', array( $this,'empty_blog_submission') );
+        add_shortcode('ltr-blog-submission', array( $this,'empty_shortcode') );
         add_shortcode('ltr-blogs', array( $this,'show_blogs') );
         add_action('plugins_loaded', array( $this,'wporg_add_submit_post_ability') );
         add_action('init', array( $this,'blog_id') );
     }
 
-    public function empty_blog_submission(){
+    //Blank shortcode used for users without posting permissions
+    public function empty_shortcode(){
         ob_start();
         ?>
         <?php
         return ob_get_clean();
     }
 
+    //Loads the entry form for blog posting
     public function load_blog_submission(){
     ob_start();
     ?>
@@ -105,7 +109,7 @@
         }
     }
 
-    #Adds the ability to see the video sumbission entry box to users that are above the editor user permissions
+    //Removes the empty shortcode and replaces it with the blog-submission for users with editing permissions and above
     function wporg_add_submit_post_ability() {
         if ( current_user_can('edit_others_posts')){
             remove_shortcode('ltr-blog-submission');
@@ -114,47 +118,21 @@
     }
 
 
+  
     public function show_blogs( ){
         global $wpdb;
         ob_start();
         $table_name = $wpdb->prefix .'blog_post';
 
-        $blog_texts = $wpdb->get_col("
-            SELECT blog_text
-            FROM $table_name"
-        );
-        
-        $blog_titles = $wpdb->get_col("
-            SELECT blog_title
-            FROM $table_name"
-        );
-
-        $user_names = $wpdb->get_col("
-            SELECT user_posted
-            FROM $table_name"
-        );
-
-        $dates_posted = $wpdb->get_col("
-            SELECT date_posted
-            FROM $table_name"
-        );
+        //Get the entries for text, title, user, and date
+        $blog_texts = $this->pull_data("blog_text", $table_name);
+        $blog_titles = $this->pull_data("blog_title", $table_name);
+        $user_names = $this->pull_data("user_posted", $table_name);
+        $dates_posted = $this->pull_data("date_posted", $table_name);
 
         echo '<div id="ltr-blogs-here">';
 
-        foreach ($blog_texts as $index => $blog_text) {
-            echo "<div id='post$index' data-blog-text='$blog_text' class='blog-post' loading='lazy'></div>";
-        }
-        foreach ($blog_titles as $index => $blog_title) {
-            echo "<div id='post$index' data-blog-title='$blog_title' class='blog-post' loading='lazy'></div>";
-        }        
-        foreach ($user_names as $index => $user_name) {
-            echo "<div id='post$index' data-blog-title='$user_name' class='blog-post' loading='lazy'></div>";
-        }        
-        foreach ($dates_posted as $index => $date) {
-            echo "<div id='post$index' data-blog-title='$date' class='blog-post' loading='lazy'></div>";
-        }        
-        echo '</div>';
-
+        //Transfers the entries into arrays
         echo "<script> var blogTexts = " . json_encode($blog_texts) . "; </script>";
         echo "<script> var blogTitles = " . json_encode($blog_titles) . "; </script>";
         echo "<script> var userNames = " . json_encode($user_names) . "; </script>";
@@ -162,11 +140,13 @@
 
         ?>
         <script>
+            //reverse the arrays so that the most recently posted entries are first
             blogTexts.reverse()
             blogTitles.reverse()
             userNames.reverse()
             datesPosted.reverse()
 
+            //Create elements on the html webpage for each entry
             blogTexts.forEach(blogText => {
                 var blogTitle = blogTitles[blogTexts.indexOf(blogText)]
                 var userName = userNames[blogTexts.indexOf(blogText)]
@@ -186,8 +166,18 @@
         </script>
         <?php
 
+        echo '</div>';
         return ob_get_clean();
     }
 
+    private function pull_data($columnName, $tableName){
+        global $wpdb;
+        $return_value = $wpdb->get_col("
+            SELECT $columnName
+            FROM $tableName"
+        );
+        return $return_value;
+    }
+
 }
- new JamSession();
+new JamSession();

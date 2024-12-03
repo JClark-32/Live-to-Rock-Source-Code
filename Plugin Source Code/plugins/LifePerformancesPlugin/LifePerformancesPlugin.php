@@ -26,7 +26,6 @@
         # (previously (same) previously 'load_videosubmission')
         
         // Load js ----------
-        # (add_action 'wp_footer', 'load_scripts' removed; unused, causes errors)
 
         # Nabs URL from submission and saves in database for later use
         add_action('init', array( $this, 'video_id' ) );
@@ -85,10 +84,10 @@
     
     // Changes the shortcode to show the video submission if the user can edit posts, i.e. Editor and above
     function wporg_add_video_submission_ability() {
-        if ( current_user_can('edit_others_posts')){
+        if (current_user_can('edit_others_posts')){
             remove_shortcode('ltr-delete-video');
-            add_shortcode('ltr-delete-video', array($this, 'delete_videos'));
             remove_shortcode('ltr-video-submission');
+            add_shortcode('ltr-delete-video', array($this, 'delete_videos'));
             add_shortcode('ltr-video-submission', array( $this,'load_video_submission') );
         }
     }
@@ -102,7 +101,7 @@
             // Checking again for a post call
             if (isset($_POST['ltr-submit-video-button'])) {
                 $video_url = sanitize_text_field($_POST['ltr-video-url']);
-            } else {
+            }else {
                 echo "Error";
             }
 
@@ -119,7 +118,6 @@
                 . "    PRIMARY KEY(id)\n"
                 . ");";
                 
-                # ????
                 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
                 dbDelta($sql);
 
@@ -135,11 +133,12 @@
                     NULL
                     );  
                 }
+                
                 if ($wpdb->last_error) {
                     echo "\nError creating table: " . $wpdb->last_error . "\nContact admin.";
                 }
-
-            } else {
+            }
+            else {
                 echo "\nError: no video ID.";
             }
 
@@ -200,8 +199,6 @@
             SELECT submission_text
             FROM $table_name"
         );
-
-        // TO-DO: CHANGE THIS! This is why it's just going to the top of the page!!
 
         # Opening tag -
         echo '<div id="ltr-videos-here">';
