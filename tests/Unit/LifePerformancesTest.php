@@ -1,15 +1,23 @@
 <?php
 use PHPUnit\Framework\TestCase;
-
-require_once 'src\LifePerformancesPlugin.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 class LifePerformancesTest extends TestCase
 {
     public function testLoadVideoSubmission()
     {
-        $lifePerformance = new LifePerformances();
+        echo "Starting test...\n";
+        // $this->assertTrue(class_exists('LifePerformances'), "The class 'LifePerformances' does not exist.");
+
+        try {
+            $lifePerformance = new LifePerformances();
+            echo "Class instantiated...\n";
+        } catch (Exception $e) {
+            echo "Exception caught: " . $e->getMessage() . "\n";
+        }
 
         $output = $lifePerformance->load_video_submission();
+        echo "Method executed...\n";
 
         $expected = '<div id="ltr-video-submission">
             <h2>Post Your Life Performance?</h2>
