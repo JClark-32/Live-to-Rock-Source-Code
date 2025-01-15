@@ -26,6 +26,7 @@
         # (previously (same) previously 'load_videosubmission')
         
         // Load js ----------
+        # (add_action 'wp_footer', 'load_scripts' removed; unused, causes errors)
 
         # Nabs URL from submission and saves in database for later use
         add_action('init', array( $this, 'video_id' ) );
@@ -84,10 +85,10 @@
     
     // Changes the shortcode to show the video submission if the user can edit posts, i.e. Editor and above
     function wporg_add_video_submission_ability() {
-        if (current_user_can('edit_others_posts')){
+        if ( current_user_can('edit_others_posts')){
             remove_shortcode('ltr-delete-video');
-            remove_shortcode('ltr-video-submission');
             add_shortcode('ltr-delete-video', array($this, 'delete_videos'));
+            remove_shortcode('ltr-video-submission');
             add_shortcode('ltr-video-submission', array( $this,'load_video_submission') );
         }
     }
@@ -95,13 +96,18 @@
     public function video_id() {
         global $wpdb;
 
+        $urlIsPosting = isset($_POST['ltr-video-url']);
+        $isRequesting = $_SERVER['REQUEST_METHOD'] === 'POST';
+
         // Checking to see if the request was made via post and if it was from the right spot
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ltr-video-url'])) {
+        if ($isRequesting && $urlIsPosting) {
+
+            $submitIsPosting = isset($_POST['ltr-submit-video-button']);
 
             // Checking again for a post call
-            if (isset($_POST['ltr-submit-video-button'])) {
+            if ($submitIsPosting) {
                 $video_url = sanitize_text_field($_POST['ltr-video-url']);
-            }else {
+            } else {
                 echo "Error";
             }
 
@@ -118,12 +124,13 @@
                 . "    PRIMARY KEY(id)\n"
                 . ");";
                 
+                # ????
                 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
                 dbDelta($sql);
 
                 $already_exists = "SELECT * FROM `wp_video_submission` WHERE EXISTS (SELECT * FROM submission_text = \'$video_id\';)";
 
-                if (isset($_POST['ltr-submit-video-button'])) {
+                if ($submitIsPosting) {
                     // Data is inserted into the created or existing table
                     $wpdb->insert(
                     $table_name,
@@ -133,12 +140,11 @@
                     NULL
                     );  
                 }
-                
                 if ($wpdb->last_error) {
                     echo "\nError creating table: " . $wpdb->last_error . "\nContact admin.";
                 }
-            }
-            else {
+
+            } else {
                 echo "\nError: no video ID.";
             }
 
@@ -149,15 +155,20 @@
 
     public function delete_videos() {
         global $wpdb;
+
+        $delBtnIsPosting = isset($_POST['ltr-delBtn']);
+        $isRequesting = $_SERVER['REQUEST_METHOD'] === 'POST';
     
         // Start output buffering
         ob_start();
     
         // Check if the request method is POST and videoInput is set
-        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['ltr-delBtn'])) {
+        if ($isRequesting && $delBtnIsPosting) {
+
+            $videoIsPosting = isset($_POST['videoInput']);
     
             // Check if 'videoInput' exists in the POST data
-            if (isset($_POST['videoInput'])) {
+            if ($videoIsPosting) {
                 // Sanitize the input
                 $video_id = sanitize_text_field($_POST['videoInput']);
                 
@@ -243,8 +254,6 @@
 
                 videoIds.forEach(videoId => {
                     console.log(videoId);
-                    // document.write == BAD >:( so commented out for now
-                    // document.write(videoId + "<br>");
                 });
             }
         </script>
