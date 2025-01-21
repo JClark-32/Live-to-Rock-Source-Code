@@ -40,6 +40,10 @@
                     <div name="title">
                         <input name="ltr-title-text" type="text" placeholder="Enter Title">
                     </div>
+                    <div name="author">
+                        <input name="ltr-author-text" type="text" placeholder="Enter Author(s)">
+                    </div>
+
                     <textarea name="ltr-blog-text"placeholder="Enter Text" required cols="80" rows = "6"></textarea>
                 </div>
                 <div id="ltr-submit">
@@ -61,6 +65,7 @@
             if (isset($_POST['ltr-post-blog-button'])) {
                 $blog_title = sanitize_text_field($_POST['ltr-title-text']);
                 $blog_text = sanitize_text_field($_POST['ltr-blog-text']);
+                $blog_author = sanitize_text_field($_POST['ltr-author-text']);
             } else {
                 echo "Error";
             }
@@ -73,6 +78,7 @@
             . "    date_posted DATETIME DEFAULT CURRENT_TIMESTAMP,\n"
             . "    blog_title TEXT NOT NULL,\n"
             . "    blog_text TEXT NOT NULL,\n"
+            . "    blog_author TEXT NOT NULL,\n"
             . "    PRIMARY KEY(id)"
             . ");";
 
@@ -89,10 +95,12 @@
                     array(
                         'user_posted' => $username,
                         'blog_title' => $blog_title,
-                        'blog_text' => $blog_text
+                        'blog_text' => $blog_text,
+                        'blog_author' => $blog_author
                     ),
                     array(
                         '%s', // user_posted
+                        '%s', // blog_author
                         '%s', // blog_title
                         '%s'  // blog_text
                     )
@@ -118,7 +126,8 @@
     }
 
 
-    public function show_blogs(){
+  
+    public function show_blogs( ){
         global $wpdb;
         ob_start();
         $table_name = $wpdb->prefix .'blog_post';
@@ -126,7 +135,8 @@
         //Get the entries for text, title, user, and date
         $blog_texts = $this->pull_data("blog_text", $table_name);
         $blog_titles = $this->pull_data("blog_title", $table_name);
-        $user_names = $this->pull_data("user_posted", $table_name);
+        //$user_names = $this->pull_data("user_posted", $table_name);
+        $blog_authors = $this->pull_data("blog_author",$table_name);
         $dates_posted = $this->pull_data("date_posted", $table_name);
 
         echo '<div id="ltr-blogs-here">';
@@ -134,7 +144,8 @@
         //Transfers the entries into arrays
         echo "<script> var blogTexts = " . json_encode($blog_texts) . "; </script>";
         echo "<script> var blogTitles = " . json_encode($blog_titles) . "; </script>";
-        echo "<script> var userNames = " . json_encode($user_names) . "; </script>";
+        //echo "<script> var userNames = " . json_encode($user_names) . "; </script>";
+        echo "<script> var blogAuthors = " . json_encode($blog_authors) . "; </script>";
         echo "<script> var datesPosted = " . json_encode($dates_posted) . "; </script>";
 
         ?>
@@ -142,19 +153,22 @@
             //reverse the arrays so that the most recently posted entries are first
             blogTexts.reverse()
             blogTitles.reverse()
-            userNames.reverse()
+            //userNames.reverse()
+            blogAuthors.reverse()
             datesPosted.reverse()
 
             //Create elements on the html webpage for each entry
             blogTexts.forEach(blogText => {
                 var blogTitle = blogTitles[blogTexts.indexOf(blogText)]
-                var userName = userNames[blogTexts.indexOf(blogText)]
+                var blogAuthor = blogAuthors[blogText.indexOf(blogText)]
+                //var userName = userNames[blogTexts.indexOf(blogText)]
                 var datePosted = datesPosted[blogTexts.indexOf(blogText)]
 
                 document.write("<hr>")
                 document.write("<div>")
                 document.write("<h2>" + blogTitle + " </h2>")
-                document.write("<label>" + userName +"</label>")
+                //document.write("<label>" + userName +"</label>")
+                document.write("<label>" + blogAuthor +"</label>")
                 document.write("<p style='color:gray'><small>"+datePosted+"</small></p>")
                 document.write("<p>" + blogText + "</p>")
                 document.write("</div>")
