@@ -79,11 +79,22 @@
             . "    blog_title TEXT NOT NULL,\n"
             . "    blog_text TEXT NOT NULL,\n"
             . "    blog_author TEXT NOT NULL,\n"
+            . "    user_liked VARCHAR(69) NOT NULL, \n"
             . "    PRIMARY KEY(id)"
+            . ");";
+
+            $likes_table_name = $wpdb->prefix . 'blog_post_likes';
+            $likes_sql = "CREATE TABLE IF NOT EXISTS $likes_table_name(\n"
+            . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
+            . "    user_liked VARCHAR(60) NOT NULL,\n"
+            . "    blog_id INT(9),\n"
+            . "    PRIMARY KEY(id),\n"
+            . "    FOREIGN KEY(blog_id) REFERENCES wp_blog_post(id)"
             . ");";
 
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
             dbDelta($sql);
+            dbDelta($likes_sql);
 
             $current_user = wp_get_current_user();
             $username = $current_user->user_login;
