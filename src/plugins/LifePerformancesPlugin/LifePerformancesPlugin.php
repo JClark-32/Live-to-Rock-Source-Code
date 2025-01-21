@@ -24,9 +24,6 @@
         # Creates a form for submitting a YT video URL to
         add_shortcode('ltr-video-submission', array ( $this, 'blank_shortcode') );
         # (previously (same) previously 'load_videosubmission')
-        
-        // Load js ----------
-        # (add_action 'wp_footer', 'load_scripts' removed; unused, causes errors)
 
         # Nabs URL from submission and saves in database for later use
         add_action('init', array( $this, 'video_id' ) );
@@ -40,7 +37,6 @@
         add_action('plugins_loaded', array( $this,'wporg_add_video_submission_ability') );
     }
 
-    // create_video_submission() removed (used for rest api but no ref in code)
 
     // Loads assets
     # Nothing in this function is ever really used because our .css and .js files are empty
@@ -108,7 +104,7 @@
             if ($submitIsPosting) {
                 $video_url = sanitize_text_field($_POST['ltr-video-url']);
             } else {
-                echo "Error";
+                error_log("Submit button is not posting");
             }
 
             preg_match('/[\\?\\&]v=([^\\?\\&]+)/', $video_url, $matches);
@@ -141,11 +137,11 @@
                     );  
                 }
                 if ($wpdb->last_error) {
-                    echo "\nError creating table: " . $wpdb->last_error . "\nContact admin.";
+                    error_log("Error creating table: " . $wpdb->last_error . "Contact admin.");
                 }
 
             } else {
-                echo "\nError: no video ID.";
+                error_log("Error: no video ID.");
             }
 
             wp_redirect($_SERVER['REQUEST_URI']);
@@ -220,7 +216,10 @@
             echo "<form id='video-posted$index' method='POST'>";
             echo "<div id='player$index' data-video-id='$video_id' class='youtube-player' loading='lazy'></div>";
             echo "<input type='hidden' name='videoInput' value='$video_id'>"; // Pass video ID to delete
-            echo "<button id='deleteButton$index' type='submit' name='ltr-delBtn' class='deleteBtn'>Delete?</button>";
+            echo "<br>";
+            if (current_user_can('edit_others_posts')){
+                echo "<button id='deleteButton$index' type='submit' name='ltr-delBtn' class='deleteBtn'>Delete?</button>";
+            }
             echo "<br>";
             echo "</form>";
         }
