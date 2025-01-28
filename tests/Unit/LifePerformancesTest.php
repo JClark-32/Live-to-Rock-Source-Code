@@ -1,20 +1,26 @@
 <?php
 
-use Brain\Monkey;
-use Brain\Monkey\Functions;
 use PHPUnit\Framework\TestCase;
-require_once __DIR__ . '/../../vendor/autoload.php';
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use Brain\Monkey;
+// require_once __DIR__ . '/../../vendor/autoload.php';
 
 class LifePerformancesTest extends TestCase
 {
+    // Adds Mockery expectations to the PHPUnit assertions count.
+    use MockeryPHPUnitIntegration;
+
+
     // FUNCTION MOCKING
     protected function setUp(): void
     {
         parent::setUp();
         Monkey\setUp(); // Set up Brain Monkey
+
         Monkey\Functions\stubs([
             'wp_enqueue_style',
-            'plugin_dir_url'
+            'plugin_dir_url',
+            'add_shortcode'
         ]);
 
         // define ABSPATH to prevent class from immediately exiting
@@ -33,7 +39,7 @@ class LifePerformancesTest extends TestCase
 
     protected function tearDown(): void
     {
-        \Brain\Monkey\tearDown(); 
+        Monkey\tearDown(); 
         parent::tearDown();
     }
 
@@ -92,6 +98,7 @@ class LifePerformancesTest extends TestCase
 
     // WPROG ADD VIDEO SUBMISSION ABILITY
 
+
     // VIDEO ID
     public function testVideoId()
     {
@@ -127,8 +134,6 @@ class LifePerformancesTest extends TestCase
         $this->assertTrue(true, "Video ID processed and inserted successfully.");
     }
     
-    
-
     // DELETE VIDEOS
     public function testDeleteVideos()
     {

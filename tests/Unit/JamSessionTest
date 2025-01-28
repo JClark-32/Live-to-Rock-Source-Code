@@ -1,0 +1,31 @@
+<?php
+
+use Brain\Monkey;
+use Brain\Monkey\Functions;
+use PHPUnit\Framework\TestCase;
+require_once __DIR__ . '/../../vendor/autoload.php';
+
+class JamSessionTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Monkey\setUp(); // Set up Brain Monkey
+        Monkey\Functions\stubs();
+
+        // define ABSPATH to prevent class from immediately exiting
+        if (!defined('ABSPATH')) {
+            define('ABSPATH', __DIR__ . '/');
+        }
+    }
+
+    protected function tearDown(): void
+    {
+        \Brain\Monkey\tearDown(); 
+        parent::tearDown();
+    }
+
+    
+
+
+}
