@@ -79,7 +79,6 @@
             . "    blog_title TEXT NOT NULL,\n"
             . "    blog_text TEXT NOT NULL,\n"
             . "    blog_author TEXT NOT NULL,\n"
-            . "    user_liked VARCHAR(69) NOT NULL, \n"
             . "    PRIMARY KEY(id)"
             . ");";
 
@@ -146,47 +145,65 @@
         //Get the entries for text, title, user, and date
         $blog_texts = $this->pull_data("blog_text", $table_name);
         $blog_titles = $this->pull_data("blog_title", $table_name);
+        $blog_ids = $this->pull_data("id",$table_name);
         //$user_names = $this->pull_data("user_posted", $table_name);
         $blog_authors = $this->pull_data("blog_author",$table_name);
         $dates_posted = $this->pull_data("date_posted", $table_name);
 
         echo '<div id="ltr-blogs-here">';
 
-        //Transfers the entries into arrays
-        echo "<script> var blogTexts = " . json_encode($blog_texts) . "; </script>";
-        echo "<script> var blogTitles = " . json_encode($blog_titles) . "; </script>";
-        //echo "<script> var userNames = " . json_encode($user_names) . "; </script>";
-        echo "<script> var blogAuthors = " . json_encode($blog_authors) . "; </script>";
-        echo "<script> var datesPosted = " . json_encode($dates_posted) . "; </script>";
-
         ?>
         <script>
-            //reverse the arrays so that the most recently posted entries are first
-            blogTexts.reverse()
-            blogTitles.reverse()
-            //userNames.reverse()
-            blogAuthors.reverse()
-            datesPosted.reverse()
+            //Transfers the entries into arrays
+            var blogIds = <?php echo json_encode($blog_ids); ?>;
+            var blogTexts = <?php echo json_encode($blog_texts); ?> ;
+            var blogTitles = <?php echo json_encode($blog_titles) ?> ;
+            var blogAuthors = <?php echo json_encode($blog_authors) ?> ;
+            var datesPosted = <?php echo json_encode($dates_posted) ?> ;
 
-            //Create elements on the html webpage for each entry
-            blogTexts.forEach(blogText => {
-                var blogTitle = blogTitles[blogTexts.indexOf(blogText)]
-                var blogAuthor = blogAuthors[blogText.indexOf(blogText)]
-                //var userName = userNames[blogTexts.indexOf(blogText)]
-                var datePosted = datesPosted[blogTexts.indexOf(blogText)]
+            //Reverses the entries of the arrays
+            blogIds.reverse();
+            blogTexts.reverse();
+            blogTitles.reverse();
+            blogAuthors.reverse();
+            datesPosted.reverse();
 
-                document.write("<hr>")
-                document.write("<div>")
-                document.write("<h2>" + blogTitle + " </h2>")
-                //document.write("<label>" + userName +"</label>")
-                document.write("<label>" + blogAuthor +"</label>")
-                document.write("<p style='color:gray'><small>"+datePosted+"</small></p>")
-                document.write("<p>" + blogText + "</p>")
-                document.write("</div>")
+            const blogContainer = document.getElementById("ltr-blogs-here");
+
+            blogTexts.forEach((blogText, index) => {
+                const postDiv = document.createElement("div");
+                postDiv.classList.add("blog-post"+blogIds[index]);
                 
-                console.log(blogTitle);
+                const hr = document.createElement("hr");
+
+                const title = document.createElement("h2");
+                title.textContent = blogTitles[index];
                 
+                const authorLabel = document.createElement("label");
+                authorLabel.textContent = blogAuthors[index];
+                
+                const datePara = document.createElement("p");
+                datePara.style.color = "gray";
+                datePara.innerHTML = `<small>${datesPosted[index]}</small>`;
+                
+                const textPara = document.createElement("p");
+                textPara.textContent = blogText;
+                
+                const likeButton = document.createElement("button");
+                likeButton.type = "submit";
+                likeButton.id = "likeButton"+blogIds[index];
+                likeButton.textContent = "Like";
+
+                postDiv.appendChild(hr);
+                postDiv.appendChild(title);
+                postDiv.appendChild(authorLabel);
+                postDiv.appendChild(datePara);
+                postDiv.appendChild(textPara);
+                postDiv.appendChild(likeButton);
+
+                blogContainer.appendChild(postDiv);
             });
+
         </script>
         <?php
 
