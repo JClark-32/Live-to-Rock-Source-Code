@@ -95,6 +95,7 @@
             . ");";
 
             $likes_table_name = $wpdb->prefix . 'blog_post_likes';
+
             $likes_sql = "CREATE TABLE IF NOT EXISTS $likes_table_name(\n"
             . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
             . "    user_liked VARCHAR(60) NOT NULL,\n"
@@ -103,9 +104,22 @@
             . "    FOREIGN KEY(blog_id) REFERENCES wp_blog_post(id)"
             . ");";
 
+            $comments_table_name = $wpdb->prefix . 'blog_post_comments';
+
+            $comments_sql = "CREATE TABLE IF NOT EXISTS $comments_table_name(\n"
+            . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
+            . "    user_commented VARCHAR(60) NOT NULL,\n"
+            . "    blog_id INT(9),\n"
+            . "    comment_text TEXT,\n"
+            . "    PRIMARY KEY(id),\n"
+            . "    FOREIGN KEY(blog_id) REFERENCES wp_blog_post(id)"
+            . ");";
+
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+           
             dbDelta($sql);
             dbDelta($likes_sql);
+            dbDelta($comments_sql);
 
             $current_user = wp_get_current_user();
             $username = $current_user->user_login;
@@ -210,7 +224,7 @@
                 textPara.textContent = blogText;
 
                 const likeButton = document.createElement("button");
-                likeButton.type = "submit";
+                likeButton.type = "button";
                 likeButton.textContent = "Like";
                 likeButton.name = "blog-likeBtn";
                 likeButton.onclick = likeClick;
@@ -218,6 +232,12 @@
                 const likeCount = document.createElement("span");
                 likeClick.name = "likeCount";
                 likeCount.textContent = blogLikes[index];
+
+                const commentButton = document.createElement("button");
+                commentButton.type = "button";
+                commentButton.textContent = "Comment";
+                commentButton.name = "blog-commentBtn";
+                commentButton.onclick = commentClick;
 
 
                 postDiv.appendChild(hr);
@@ -227,6 +247,7 @@
                 postDiv.appendChild(textPara);
                 postDiv.appendChild(likeButton);
                 postDiv.appendChild(likeCount);
+                postDiv.appendChild(commentButton);
 
                 blogContainer.appendChild(postDiv);
 
@@ -256,8 +277,38 @@
                     console.log(blogPostId);
                 }
 
-            })
+                var boxExists;
 
+                function commentClick(){
+                    var input = document.createElement("input");
+                    input.type="text";
+                    input.id = "blog-comment-input"+blogIds[index];
+                    input.name="blog-commentInput";
+
+                    input.addEventListener("keydown", function(event) {
+                        if (event.key === "Enter") {
+                            submitComment(input.value);
+                            input.value = "";
+                        }
+                    });
+
+                    var currentInputBox = document.getElementById("blog-comment-input"+blogIds[index]);
+
+                    if (boxExists == true) {
+                        boxExists = false;
+                        currentInputBox.remove();
+
+                    }
+                    else{
+                        boxExists = true;
+                        postDiv.appendChild(input);
+                    }
+                }
+                function submitComment(comment) {
+                    console.log("Comment submitted:", comment);
+                }
+                
+            })
         </script>
         <?php
 
