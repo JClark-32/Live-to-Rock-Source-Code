@@ -18,6 +18,18 @@
         add_shortcode('ltr-blogs', array( $this,'show_blogs') );
         add_action('plugins_loaded', array( $this,'wporg_add_submit_post_ability') );
         add_action('init', array( $this,'blog_id') );
+        add_action('wp_enqueue_scripts', array($this, 'load_jquery'));
+        add_action('wp_ajax_test_ajax_request', array($this,'test_ajax_request'));
+        add_action('wp_head',array($this,'blog_ajaxurl'));
+    }
+    public function load_jquery(){
+        wp_enqueue_script('jquery');
+    }
+    public function blog_ajaxurl(){
+        echo'<script type="text/javascript">
+                var ajaxurl = "' . admin_url('admin-ajax.php').'";
+                </script>
+        ';
     }
 
     //Blank shortcode used for users without posting permissions
@@ -134,8 +146,6 @@
             add_shortcode('ltr-blog-submission', array( $this,'load_blog_submission') );
         }
     }
-
-
   
     public function show_blogs( ){
         global $wpdb;
@@ -188,11 +198,12 @@
                 
                 const textPara = document.createElement("p");
                 textPara.textContent = blogText;
-                
+
                 const likeButton = document.createElement("button");
                 likeButton.type = "submit";
-                likeButton.id = "likeButton"+blogIds[index];
                 likeButton.textContent = "Like";
+                likeButton.name = "blog-likeBtn";
+                likeButton.onclick = likeClick;
 
                 postDiv.appendChild(hr);
                 postDiv.appendChild(title);
@@ -200,15 +211,75 @@
                 postDiv.appendChild(datePara);
                 postDiv.appendChild(textPara);
                 postDiv.appendChild(likeButton);
+                
 
                 blogContainer.appendChild(postDiv);
-            });
+
+                function likeClick(){
+                    jQuery(document).ready(function($){
+                        var test = "HELLO";
+                        $.ajax({
+                            url:ajaxurl,
+                            data:{
+                                'action':'test_ajax_request',
+                                'test' : test
+                            },
+                            success:function(data){
+                                window.alert("AAAAAA");
+                            },
+                            error:function(errorThrown){
+                                window.alert("errorThrown");
+                            }
+                        })
+                    })
+                    var blogPostId = blogIds[index];
+                    console.log(blogPostId);
+                }
+
+            })
 
         </script>
         <?php
+        
+        $like_table_name = $wpdb -> prefix . 'blog_post_likes';
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['blog_id'])) {
+            $blog_id = intval($_POST['blog_id']);
+            
+            $current_user = wp_get_current_user();
+            $username = $current_user->user_login;
+
+            $checkQuery = "SELECT user_liked FROM wp_blog_post_likes WHERE user_liked='$username' AND blog_id='$blog_id'";
+            $results = $wpdb->query($checkQuery);
+
+            echo $results;
+
+            $wpdb->insert(
+                $like_table_name,
+                array(
+                    'user_liked' => $username,
+                    'blog_id' => $blog_id,
+                ),
+                array(
+                    '%s', // blog_author
+                    '%d', // blog_title
+                )
+            );
+            echo "<p>Blog post " . htmlspecialchars($blog_id) . " liked!</p>";
+        }
+        
 
         echo '</div>';
         return ob_get_clean();
+    }
+    private function test_ajax_request(){
+        if(isset($_REQUEST)){
+            $test=$_REQUEST['test'];
+            if($test=="HELLO"){
+                $test=='hello';
+            }
+            echo $test;
+        }
+        die();
     }
 
     private function pull_data($columnName, $tableName){
