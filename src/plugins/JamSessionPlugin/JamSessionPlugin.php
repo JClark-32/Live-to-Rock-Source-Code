@@ -19,7 +19,7 @@
         add_action('plugins_loaded', array( $this,'wporg_add_submit_post_ability') );
         add_action('init', array( $this,'blog_id') );
         add_action('wp_enqueue_scripts', array($this, 'load_jquery'));
-        add_action('wp_ajax_test_ajax_request', array($this,'test_ajax_request'));
+        add_action('wp_ajax_like_ajax_request', array($this,'like_ajax_request'));
         add_action('wp_head',array($this,'blog_ajaxurl'));
     }
     public function load_jquery(){
@@ -205,27 +205,31 @@
                 likeButton.name = "blog-likeBtn";
                 likeButton.onclick = likeClick;
 
+                const likeCount = document.createElement("span");
+                likeClick.name = "likeCount";
+
+
                 postDiv.appendChild(hr);
                 postDiv.appendChild(title);
                 postDiv.appendChild(authorLabel);
                 postDiv.appendChild(datePara);
                 postDiv.appendChild(textPara);
                 postDiv.appendChild(likeButton);
-                
+                postDiv.appendChild(likeCount);
 
                 blogContainer.appendChild(postDiv);
 
                 function likeClick(){
                     jQuery(document).ready(function($){
-                        var test = "HELLO";
+                        var postId = blogIds[index];
                         $.ajax({
                             url:ajaxurl,
                             data:{
-                                'action':'test_ajax_request',
-                                'test' : test
+                                'action':'like_ajax_request',
+                                'postID' :postId
                             },
                             success:function(data){
-                                window.alert("AAAAAA");
+                                window.alert(data);
                             },
                             error:function(errorThrown){
                                 window.alert("errorThrown");
@@ -241,18 +245,27 @@
         </script>
         <?php
         
+        echo '</div>';
+        return ob_get_clean();
+    }
+    public function like_ajax_request(){
+        global $wpdb;
+
         $like_table_name = $wpdb -> prefix . 'blog_post_likes';
-        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['blog_id'])) {
-            $blog_id = intval($_POST['blog_id']);
-            
-            $current_user = wp_get_current_user();
-            $username = $current_user->user_login;
+        $current_user = wp_get_current_user();
+        $username = $current_user->user_login;
 
-            $checkQuery = "SELECT user_liked FROM wp_blog_post_likes WHERE user_liked='$username' AND blog_id='$blog_id'";
-            $results = $wpdb->query($checkQuery);
+        if(isset($_REQUEST)){
+            $postID=$_REQUEST['postID'];
+            $blog_id = $postID;
+        }
 
-            echo $results;
+        $checkQuery = "SELECT user_liked FROM wp_blog_post_likes WHERE user_liked='$username' AND blog_id='$blog_id'";
+        $results = $wpdb->query($checkQuery);
 
+        echo $results;
+        
+        if ($results==0){
             $wpdb->insert(
                 $like_table_name,
                 array(
@@ -264,20 +277,10 @@
                     '%d', // blog_title
                 )
             );
-            echo "<p>Blog post " . htmlspecialchars($blog_id) . " liked!</p>";
         }
-        
-
-        echo '</div>';
-        return ob_get_clean();
-    }
-    private function test_ajax_request(){
-        if(isset($_REQUEST)){
-            $test=$_REQUEST['test'];
-            if($test=="HELLO"){
-                $test=='hello';
-            }
-            echo $test;
+        else{
+            $deleteQuery = "DELETE FROM wp_blog_post_likes WHERE user_liked='$username' AND blog_id='$blog_id'";
+            $wpdb->query($deleteQuery);
         }
         die();
     }
