@@ -89,6 +89,12 @@
         }
     }
 
+    function insert_data($table_name, $video_id) {
+        global $wpdb;
+
+        $wpdb->insert($table_name,array('submission_text' => $video_id,),NULL); 
+    }
+
     public function video_id() {
         global $wpdb;
 
@@ -124,17 +130,9 @@
                 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
                 dbDelta($sql);
 
-                $already_exists = "SELECT * FROM `wp_video_submission` WHERE EXISTS (SELECT * FROM submission_text = \'$video_id\';)";
-
                 if ($submitIsPosting) {
                     // Data is inserted into the created or existing table
-                    $wpdb->insert(
-                    $table_name,
-                    array(
-                        'submission_text' => $video_id,
-                    ),
-                    NULL
-                    );  
+                    $this->insert_data($table_name, $video_id);
                 }
                 if ($wpdb->last_error) {
                     error_log("Error creating table: " . $wpdb->last_error . "Contact admin.");
