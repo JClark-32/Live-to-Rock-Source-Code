@@ -151,6 +151,7 @@
         global $wpdb;
         ob_start();
         $table_name = $wpdb->prefix .'blog_post';
+        $like_table_name = $wpdb->prefix . 'blog_post_likes';
 
         //Get the entries for text, title, user, and date
         $blog_texts = $this->pull_data("blog_text", $table_name);
@@ -159,17 +160,25 @@
         //$user_names = $this->pull_data("user_posted", $table_name);
         $blog_authors = $this->pull_data("blog_author",$table_name);
         $dates_posted = $this->pull_data("date_posted", $table_name);
+        $blog_likes = [];
+        
+        foreach ($blog_ids as $value) {
+            $LikeCountQuery = "SELECT user_liked FROM wp_blog_post_likes WHERE blog_id='$value'";
+            $results = $wpdb->query($LikeCountQuery);
+            array_push($blog_likes, $results);
+        };
 
         echo '<div id="ltr-blogs-here">';
 
         ?>
         <script>
             //Transfers the entries into arrays
-            var blogIds = <?php echo json_encode($blog_ids); ?>;
-            var blogTexts = <?php echo json_encode($blog_texts); ?> ;
+            var blogIds = <?php echo json_encode($blog_ids) ?> ;
+            var blogTexts = <?php echo json_encode($blog_texts) ?> ;
             var blogTitles = <?php echo json_encode($blog_titles) ?> ;
             var blogAuthors = <?php echo json_encode($blog_authors) ?> ;
             var datesPosted = <?php echo json_encode($dates_posted) ?> ;
+            var blogLikes = <?php echo json_encode($blog_likes) ?> ;
 
             //Reverses the entries of the arrays
             blogIds.reverse();
@@ -177,6 +186,7 @@
             blogTitles.reverse();
             blogAuthors.reverse();
             datesPosted.reverse();
+            blogLikes.reverse();
 
             const blogContainer = document.getElementById("ltr-blogs-here");
 
@@ -207,6 +217,7 @@
 
                 const likeCount = document.createElement("span");
                 likeClick.name = "likeCount";
+                likeCount.textContent = blogLikes[index];
 
 
                 postDiv.appendChild(hr);
@@ -229,7 +240,12 @@
                                 'postID' :postId
                             },
                             success:function(data){
-                                window.alert(data);
+                                if(data == "liked"){
+                                    likeCount.textContent=parseInt(likeCount.textContent)+1;
+                                }
+                                else if(data == "unliked"){
+                                    likeCount.textContent=parseInt(likeCount.textContent)-1;
+                                }
                             },
                             error:function(errorThrown){
                                 window.alert("errorThrown");
@@ -244,7 +260,7 @@
 
         </script>
         <?php
-        
+
         echo '</div>';
         return ob_get_clean();
     }
@@ -262,10 +278,9 @@
 
         $checkQuery = "SELECT user_liked FROM wp_blog_post_likes WHERE user_liked='$username' AND blog_id='$blog_id'";
         $results = $wpdb->query($checkQuery);
-
-        echo $results;
         
         if ($results==0){
+            echo "liked";
             $wpdb->insert(
                 $like_table_name,
                 array(
@@ -279,6 +294,7 @@
             );
         }
         else{
+            echo "unliked";
             $deleteQuery = "DELETE FROM wp_blog_post_likes WHERE user_liked='$username' AND blog_id='$blog_id'";
             $wpdb->query($deleteQuery);
         }
