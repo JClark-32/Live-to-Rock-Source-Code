@@ -156,6 +156,32 @@
         }
     }
 
+    function check_for_sql_err($video_id){
+        global $wpdb;
+
+        // Check for any SQL errors
+        if ($wpdb->last_error) {
+            error_log("Error deleting video: " . $wpdb->last_error);
+        } else {
+            error_log("Video successfully deleted with ID: " . $video_id);
+        }
+    }
+
+    function delete_data($videoIsPosting){
+        global $wpdb;
+
+        if ($videoIsPosting) {
+            // Sanitize the input
+            $video_id = sanitize_text_field($_POST['videoInput']);
+
+            //Get table name
+            $table_name = $wpdb->prefix . 'video_submission';
+
+            // Execute the query
+            $wpdb->query($wpdb->prepare("DELETE FROM $table_name WHERE submission_text = %s", $video_id));
+        }
+    }
+
     public function delete_videos() {
         global $wpdb;
 
@@ -170,33 +196,10 @@
 
             $videoIsPosting = isset($_POST['videoInput']);
     
-            // Check if 'videoInput' exists in the POST data
-            if ($videoIsPosting) {
-                // Sanitize the input
-                $video_id = sanitize_text_field($_POST['videoInput']);
-                
-                // Log the video ID for further debugging
-                error_log("Deleting video ID: " . $video_id);
-
-                $table_name = $wpdb->prefix . 'video_submission';
-    
-                // Execute the query
-                $wpdb->query($wpdb->prepare(
-                    "DELETE FROM $table_name 
-                    WHERE submission_text = %s",
-                    $video_id
-                ));
-    
-                // Check for any SQL errors
-                if ($wpdb->last_error) {
-                    error_log("Error deleting video: " . $wpdb->last_error);
-                } else {
-                    error_log("Video successfully deleted with ID: " . $video_id);
-                }
-            } else {
-                // If 'videoInput' is not set, log that as well
-                error_log("No videoInput received in the request.");
-            }
+            // Deletes the video_id then checks for errors
+            $this->delete_data($videoIsPosting);
+            $this->check_for_sql_err($video_id);
+            
             wp_redirect(add_query_arg('message', 'video_deleted', wp_get_referer()));
             exit;
         }
