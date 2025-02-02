@@ -20,6 +20,7 @@
         add_action('init', array( $this,'blog_id') );
         add_action('wp_enqueue_scripts', array($this, 'load_jquery'));
         add_action('wp_ajax_like_ajax_request', array($this,'like_ajax_request'));
+        add_action('wp_ajax_comment_ajax_request', array($this,'comment_ajax_request'));
         add_action('wp_head',array($this,'blog_ajaxurl'));
     }
     public function load_jquery(){
@@ -109,6 +110,7 @@
             $comments_sql = "CREATE TABLE IF NOT EXISTS $comments_table_name(\n"
             . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
             . "    user_commented VARCHAR(60) NOT NULL,\n"
+            . "    date_posted DATETIME DEFAULT CURRENT_TIMESTAMP,\n"
             . "    blog_id INT(9),\n"
             . "    comment_text TEXT,\n"
             . "    PRIMARY KEY(id),\n"
@@ -239,7 +241,6 @@
                 commentButton.name = "blog-commentBtn";
                 commentButton.onclick = commentClick;
 
-
                 postDiv.appendChild(hr);
                 postDiv.appendChild(title);
                 postDiv.appendChild(authorLabel);
@@ -280,11 +281,14 @@
                 var boxExists;
 
                 function commentClick(){
+                    var commentsDiv = document.createElement("div");
+                    commentsDiv.id = "blog-comments"+blogIds[index];
+
                     var input = document.createElement("input");
                     input.type="text";
-                    input.id = "blog-comment-input"+blogIds[index];
+                    input.id = "blog-comment-input";
                     input.name="blog-commentInput";
-
+                    
                     input.addEventListener("keydown", function(event) {
                         if (event.key === "Enter") {
                             submitComment(input.value);
@@ -292,19 +296,45 @@
                         }
                     });
 
-                    var currentInputBox = document.getElementById("blog-comment-input"+blogIds[index]);
+                    commentsDiv.append(input);
+
+                    var currentCommentsDiv = document.getElementById("blog-comments"+blogIds[index]);
 
                     if (boxExists == true) {
                         boxExists = false;
-                        currentInputBox.remove();
+                        currentCommentsDiv.remove();
 
                     }
                     else{
                         boxExists = true;
-                        postDiv.appendChild(input);
+                        postDiv.appendChild(commentsDiv);
                     }
                 }
                 function submitComment(comment) {
+                    jQuery(document).ready(function($){
+                        var postId = blogIds[index];
+                        $.ajax({
+                            url:ajaxurl,
+                            data:{
+                                'action':'comment_ajax_request',
+                                'postID' :postId,
+                                'comment':comment
+                            },
+                            success:function(data){
+                                if(data == "success"){
+                                    alert("success");
+                                }
+                                else if(data == "error"){
+                                    alert("broke");
+                                }
+                            },
+                            error:function(errorThrown){
+                                window.alert("errorThrown");
+                            }
+                        })
+                    })
+                    var blogPostId = blogIds[index];
+                    console.log(blogPostId);
                     console.log("Comment submitted:", comment);
                 }
                 
@@ -315,6 +345,42 @@
         echo '</div>';
         return ob_get_clean();
     }
+    public function comment_ajax_request(){
+        global $wpdb;
+
+        $comment_table_name = $wpdb -> prefix . 'blog_post_comments';
+        $current_user = wp_get_current_user();
+        $username = $current_user->user_login;
+
+        if(isset($_REQUEST)){
+            $blog_id=$_REQUEST['postID'];
+            $comment=$_REQUEST['comment'];
+        }
+
+        $wpdb->insert(
+            $comment_table_name,
+            array(
+                'user_commented' => $username,
+                'blog_id' => $blog_id,
+                'comment_text' => $comment,
+            ),
+            array(
+                '%s', // comment_author
+                '%d', // blog_title
+                '%s', // comment_text 
+            )
+        );
+
+        if ($comment == 'test'){
+            echo"success";
+        }
+        else{
+            echo"error";
+        }
+
+        die();
+    }
+
     public function like_ajax_request(){
         global $wpdb;
 
@@ -360,6 +426,5 @@
         );
         return $return_value;
     }
-
 }
 new JamSession();
