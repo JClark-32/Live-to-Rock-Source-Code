@@ -21,6 +21,7 @@
         add_action('wp_enqueue_scripts', array($this, 'load_jquery'));
         add_action('wp_ajax_like_ajax_request', array($this,'like_ajax_request'));
         add_action('wp_ajax_comment_ajax_request', array($this,'comment_ajax_request'));
+        add_action('wp_ajax_comments_clicked_ajax_request', array($this,'comments_clicked_ajax_request'));
         add_action('wp_head',array($this,'blog_ajaxurl'));
     }
     public function load_jquery(){
@@ -102,7 +103,7 @@
             . "    user_liked VARCHAR(60) NOT NULL,\n"
             . "    blog_id INT(9),\n"
             . "    PRIMARY KEY(id),\n"
-            . "    FOREIGN KEY(blog_id) REFERENCES wp_blog_post(id)"
+            . "    FOREIGN KEY(blog_id) REFERENCES $table_name(id)"
             . ");";
 
             $comments_table_name = $wpdb->prefix . 'blog_post_comments';
@@ -114,7 +115,7 @@
             . "    blog_id INT(9),\n"
             . "    comment_text TEXT,\n"
             . "    PRIMARY KEY(id),\n"
-            . "    FOREIGN KEY(blog_id) REFERENCES wp_blog_post(id)"
+            . "    FOREIGN KEY(blog_id) REFERENCES $table_name(id)"
             . ");";
 
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -167,7 +168,6 @@
         global $wpdb;
         ob_start();
         $table_name = $wpdb->prefix .'blog_post';
-        $like_table_name = $wpdb->prefix . 'blog_post_likes';
 
         //Get the entries for text, title, user, and date
         $blog_texts = $this->pull_data("blog_text", $table_name);
@@ -179,8 +179,10 @@
         $blog_likes = [];
         
         foreach ($blog_ids as $value) {
-            $LikeCountQuery = "SELECT user_liked FROM wp_blog_post_likes WHERE blog_id='$value'";
+            $likes_table_name = $wpdb->prefix . 'blog_post_likes';
+            $LikeCountQuery = "SELECT user_liked FROM $likes_table_name WHERE blog_id='$value'";
             $results = $wpdb->query($LikeCountQuery);
+
             array_push($blog_likes, $results);
         };
 
@@ -237,7 +239,7 @@
 
                 const commentButton = document.createElement("button");
                 commentButton.type = "button";
-                commentButton.textContent = "Comment";
+                commentButton.textContent = "Comments";
                 commentButton.name = "blog-commentBtn";
                 commentButton.onclick = commentClick;
 
@@ -288,6 +290,58 @@
                     input.type="text";
                     input.id = "blog-comment-input";
                     input.name="blog-commentInput";
+
+
+                    jQuery(document).ready(function($){
+                        var comment_texts = Array;
+                        var userCommented = Array;
+                        var commentsDatePosted = Array;
+                        var commentIds = Array;
+                        var postId = blogIds[index];
+                        $.ajax({
+                            url:ajaxurl,
+                            data:{
+                                'action':'comments_clicked_ajax_request',
+                                'postID' : postId
+                            },
+                            success:function(data){
+                                var response = JSON.parse(data);
+                                //alert(response.comment_texts);
+                                commentTexts = (response.comment_texts);
+                                userCommented = (response.comment_user_names);
+                                commentsDatePosted = (response.comment_dates_posted);
+                                commentIds = (response.comment_ids);
+
+
+                                commentIds.forEach((commentId, index2) => {
+                                    
+                                    const commentDiv = document.createElement("div");
+                                    commentDiv.classList.add("comment"+blogIds[index]+commentIds[index2]);
+
+                                    const commentUserNameLabel = document.createElement("label");
+                                    commentUserNameLabel.textContent = userCommented[index2];
+
+                                    const commentDatePara = document.createElement("p");
+                                    commentDatePara.style.color = "gray";
+                                    commentDatePara.innerHTML = `<small>${commentsDatePosted[index2]}</small>`;
+
+                                    const commentText = document.createElement("p");
+                                    commentText.textContent = commentTexts[index2]; 
+
+                                    commentDiv.appendChild(commentUserNameLabel);
+                                    commentDiv.appendChild(commentDatePara);
+                                    commentDiv.appendChild(commentText);
+
+                                    commentsDiv.appendChild(commentDiv);
+                                    
+                                })
+                            },
+                            error:function(errorThrown){
+                                window.alert("errorThrown");
+                            }
+                        })
+                    })
+                
                     
                     input.addEventListener("keydown", function(event) {
                         if (event.key === "Enter") {
@@ -310,6 +364,7 @@
                         postDiv.appendChild(commentsDiv);
                     }
                 }
+
                 function submitComment(comment) {
                     jQuery(document).ready(function($){
                         var postId = blogIds[index];
@@ -321,12 +376,6 @@
                                 'comment':comment
                             },
                             success:function(data){
-                                if(data == "success"){
-                                    alert("success");
-                                }
-                                else if(data == "error"){
-                                    alert("broke");
-                                }
                             },
                             error:function(errorThrown){
                                 window.alert("errorThrown");
@@ -362,7 +411,7 @@
             array(
                 'user_commented' => $username,
                 'blog_id' => $blog_id,
-                'comment_text' => $comment,
+                'comment_text' => $comment
             ),
             array(
                 '%s', // comment_author
@@ -370,12 +419,40 @@
                 '%s', // comment_text 
             )
         );
+        die();
+    }
 
-        if ($comment == 'test'){
-            echo"success";
-        }
-        else{
-            echo"error";
+    public function comments_clicked_ajax_request(){
+        global $wpdb;
+
+        $table_name = $wpdb->prefix .'blog_post_comments';
+
+        if(isset($_REQUEST)){
+            $postID=$_REQUEST['postID'];
+            
+            $commentTextsQuery = "SELECT comment_text FROM $table_name WHERE blog_id='$postID'";
+            $commentUserNamesQuery = "SELECT user_commented FROM $table_name WHERE blog_id='$postID'";
+            $commentDatesPostedQuery = "SELECT date_posted FROM $table_name WHERE blog_id='$postID'";
+            $commentIdsQuery = "SELECT id FROM $table_name WHERE blog_id='$postID'";
+
+            $comment_texts = $wpdb->get_col($commentTextsQuery);
+            $comment_user_names = $wpdb->get_col($commentUserNamesQuery);
+            $comment_ids = $wpdb->get_col($commentIdsQuery);
+            $comment_dates_posted = $wpdb->get_col($commentDatesPostedQuery);
+
+            $comment_texts = array_reverse($comment_texts);
+            $comment_user_names = array_reverse($comment_user_names);
+            $comment_ids = array_reverse($comment_ids);
+            $comment_dates_posted = array_reverse($comment_dates_posted);
+
+            $comments = [
+                "comment_ids" => $comment_ids,
+                "comment_user_names" => $comment_user_names,
+                "comment_dates_posted" => $comment_dates_posted,
+                "comment_texts" => $comment_texts
+            ];
+
+            echo json_encode($comments);
         }
 
         die();
@@ -384,7 +461,7 @@
     public function like_ajax_request(){
         global $wpdb;
 
-        $like_table_name = $wpdb -> prefix . 'blog_post_likes';
+        $likes_table_name = $wpdb->prefix . 'blog_post_likes';
         $current_user = wp_get_current_user();
         $username = $current_user->user_login;
 
@@ -393,16 +470,16 @@
             $blog_id = $postID;
         }
 
-        $checkQuery = "SELECT user_liked FROM wp_blog_post_likes WHERE user_liked='$username' AND blog_id='$blog_id'";
+        $checkQuery = "SELECT user_liked FROM $likes_table_name WHERE user_liked='$username' AND blog_id='$blog_id'";
         $results = $wpdb->query($checkQuery);
         
         if ($results==0){
             echo "liked";
             $wpdb->insert(
-                $like_table_name,
+                $likes_table_name,
                 array(
                     'user_liked' => $username,
-                    'blog_id' => $blog_id,
+                    'blog_id' => $blog_id
                 ),
                 array(
                     '%s', // blog_author
@@ -412,7 +489,7 @@
         }
         else{
             echo "unliked";
-            $deleteQuery = "DELETE FROM wp_blog_post_likes WHERE user_liked='$username' AND blog_id='$blog_id'";
+            $deleteQuery = "DELETE FROM $likes_table_name WHERE user_liked='$username' AND blog_id='$blog_id'";
             $wpdb->query($deleteQuery);
         }
         die();
