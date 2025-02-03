@@ -69,14 +69,56 @@
     return ob_get_clean();
     }
 
+    function create_db_tables($table_name){
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name(\n"
+        . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
+        . "    user_posted VARCHAR(60) NOT NULL,\n"
+        . "    date_posted DATETIME DEFAULT CURRENT_TIMESTAMP,\n"
+        . "    blog_title TEXT NOT NULL,\n"
+        . "    blog_text TEXT NOT NULL,\n"
+        . "    blog_author TEXT NOT NULL,\n"
+        . "    PRIMARY KEY(id)"
+        . ");";
+
+        $likes_table_name = $wpdb->prefix . 'blog_post_likes';
+
+        $likes_sql = "CREATE TABLE IF NOT EXISTS $likes_table_name(\n"
+        . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
+        . "    user_liked VARCHAR(60) NOT NULL,\n"
+        . "    blog_id INT(9),\n"
+        . "    PRIMARY KEY(id),\n"
+        . "    FOREIGN KEY(blog_id) REFERENCES $table_name(id)"
+        . ");";
+
+        $comments_table_name = $wpdb->prefix . 'blog_post_comments';
+
+        $comments_sql = "CREATE TABLE IF NOT EXISTS $comments_table_name(\n"
+        . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
+        . "    user_commented VARCHAR(60) NOT NULL,\n"
+        . "    date_posted DATETIME DEFAULT CURRENT_TIMESTAMP,\n"
+        . "    blog_id INT(9),\n"
+        . "    comment_text TEXT,\n"
+        . "    PRIMARY KEY(id),\n"
+        . "    FOREIGN KEY(blog_id) REFERENCES $table_name(id)"
+        . ");";
+
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        
+        dbDelta($sql);
+        dbDelta($likes_sql);
+        dbDelta($comments_sql);
+    }
+
     public function blog_id(){
         global $wpdb;
 
         // check if request was made & if from correct spot
         if ($_SERVER['REQUEST_METHOD'] === 'POST'  && isset($_POST['ltr-blog-text'])) {
 
+            $post_blog_button = isset($_POST['ltr-post-blog-button']);
+
             // check again for post call
-            if (isset($_POST['ltr-post-blog-button'])) {
+            if ($post_blog_button) {
                 $blog_title = sanitize_text_field($_POST['ltr-title-text']);
                 $blog_text = sanitize_text_field($_POST['ltr-blog-text']);
                 $blog_author = sanitize_text_field($_POST['ltr-author-text']);
@@ -85,49 +127,12 @@
             }
 
             $table_name = $wpdb->prefix . 'blog_post';
-
-            $sql = "CREATE TABLE IF NOT EXISTS $table_name(\n"
-            . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
-            . "    user_posted VARCHAR(60) NOT NULL,\n"
-            . "    date_posted DATETIME DEFAULT CURRENT_TIMESTAMP,\n"
-            . "    blog_title TEXT NOT NULL,\n"
-            . "    blog_text TEXT NOT NULL,\n"
-            . "    blog_author TEXT NOT NULL,\n"
-            . "    PRIMARY KEY(id)"
-            . ");";
-
-            $likes_table_name = $wpdb->prefix . 'blog_post_likes';
-
-            $likes_sql = "CREATE TABLE IF NOT EXISTS $likes_table_name(\n"
-            . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
-            . "    user_liked VARCHAR(60) NOT NULL,\n"
-            . "    blog_id INT(9),\n"
-            . "    PRIMARY KEY(id),\n"
-            . "    FOREIGN KEY(blog_id) REFERENCES $table_name(id)"
-            . ");";
-
-            $comments_table_name = $wpdb->prefix . 'blog_post_comments';
-
-            $comments_sql = "CREATE TABLE IF NOT EXISTS $comments_table_name(\n"
-            . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
-            . "    user_commented VARCHAR(60) NOT NULL,\n"
-            . "    date_posted DATETIME DEFAULT CURRENT_TIMESTAMP,\n"
-            . "    blog_id INT(9),\n"
-            . "    comment_text TEXT,\n"
-            . "    PRIMARY KEY(id),\n"
-            . "    FOREIGN KEY(blog_id) REFERENCES $table_name(id)"
-            . ");";
-
-            require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-           
-            dbDelta($sql);
-            dbDelta($likes_sql);
-            dbDelta($comments_sql);
+            $this->create_db_tables($table_name);
 
             $current_user = wp_get_current_user();
             $username = $current_user->user_login;
 
-            if (isset($_POST['ltr-post-blog-button'])) {
+            if ($post_blog_button) {
                 // insert data
                 $wpdb->insert(
                     $table_name,
