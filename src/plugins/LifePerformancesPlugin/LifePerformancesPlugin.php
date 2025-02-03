@@ -89,6 +89,49 @@
         }
     }
 
+    function insert_data($table_name, $video_id) {
+        global $wpdb;
+
+        $wpdb->insert($table_name,array('submission_text' => $video_id,),NULL); 
+    }
+
+    function check_for_post($submitIsPosting){
+        // Checking again for a post call
+        if ($submitIsPosting) {
+            $video_url = sanitize_text_field($_POST['ltr-video-url']);
+        } else {
+            error_log("Submit button is not posting");
+        }
+
+        preg_match('/[\\?\\&]v=([^\\?\\&]+)/', $video_url, $matches);
+        return $matches[1];
+    }
+
+    function create_db_table($table_name){
+        // Create db table if doesn't already exist
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name(\n"
+        . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
+        . "    submission_text VARCHAR(11) NOT NULL,\n"
+        . "    PRIMARY KEY(id)\n"
+        . ");";
+        
+        # ????
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql);
+    }
+
+    function enter_data_if_able($submitIsPosting, $table_name, $video_id){
+        global $wpdb;
+
+        if ($submitIsPosting) {
+            // Data is inserted into the created or existing table
+            $this->insert_data($table_name, $video_id);
+        }
+        if ($wpdb->last_error) {
+            error_log("Error creating table: " . $wpdb->last_error . "Contact admin.");
+        }
+    }
+
     public function video_id() {
         global $wpdb;
 
@@ -97,55 +140,45 @@
 
         // Checking to see if the request was made via post and if it was from the right spot
         if ($isRequesting && $urlIsPosting) {
-
             $submitIsPosting = isset($_POST['ltr-submit-video-button']);
-
-            // Checking again for a post call
-            if ($submitIsPosting) {
-                $video_url = sanitize_text_field($_POST['ltr-video-url']);
-            } else {
-                error_log("Submit button is not posting");
-            }
-
-            preg_match('/[\\?\\&]v=([^\\?\\&]+)/', $video_url, $matches);
-            $video_id = $matches[1];
+            $video_id = $this->check_for_post($submitIsPosting);
 
             if ($video_id) {
                 $table_name = $wpdb->prefix . 'video_submission';
-
-                // Create db table if doesn't already exist
-                $sql = "CREATE TABLE IF NOT EXISTS $table_name(\n"
-                . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
-                . "    submission_text VARCHAR(11) NOT NULL,\n"
-                . "    PRIMARY KEY(id)\n"
-                . ");";
-                
-                # ????
-                require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-                dbDelta($sql);
-
-                $already_exists = "SELECT * FROM `wp_video_submission` WHERE EXISTS (SELECT * FROM submission_text = \'$video_id\';)";
-
-                if ($submitIsPosting) {
-                    // Data is inserted into the created or existing table
-                    $wpdb->insert(
-                    $table_name,
-                    array(
-                        'submission_text' => $video_id,
-                    ),
-                    NULL
-                    );  
-                }
-                if ($wpdb->last_error) {
-                    error_log("Error creating table: " . $wpdb->last_error . "Contact admin.");
-                }
-
+                $this->create_db_table($table_name);
+                $this->enter_data_if_able($submitIsPosting, $table_name, $video_id);
             } else {
                 error_log("Error: no video ID.");
             }
 
             wp_redirect($_SERVER['REQUEST_URI']);
             exit;
+        }
+    }
+
+    function check_for_sql_err($video_id){
+        global $wpdb;
+
+        // Check for any SQL errors
+        if ($wpdb->last_error) {
+            error_log("Error deleting video: " . $wpdb->last_error);
+        } else {
+            error_log("Video successfully deleted with ID: " . $video_id);
+        }
+    }
+
+    function delete_data($videoIsPosting){
+        global $wpdb;
+
+        if ($videoIsPosting) {
+            // Sanitize the input
+            $video_id = sanitize_text_field($_POST['videoInput']);
+
+            //Get table name
+            $table_name = $wpdb->prefix . 'video_submission';
+
+            // Execute the query
+            $wpdb->query($wpdb->prepare("DELETE FROM $table_name WHERE submission_text = %s", $video_id));
         }
     }
 
@@ -163,33 +196,10 @@
 
             $videoIsPosting = isset($_POST['videoInput']);
     
-            // Check if 'videoInput' exists in the POST data
-            if ($videoIsPosting) {
-                // Sanitize the input
-                $video_id = sanitize_text_field($_POST['videoInput']);
-                
-                // Log the video ID for further debugging
-                error_log("Deleting video ID: " . $video_id);
-
-                $table_name = $wpdb->prefix . 'video_submission';
-    
-                // Execute the query
-                $wpdb->query($wpdb->prepare(
-                    "DELETE FROM $table_name 
-                    WHERE submission_text = %s",
-                    $video_id
-                ));
-    
-                // Check for any SQL errors
-                if ($wpdb->last_error) {
-                    error_log("Error deleting video: " . $wpdb->last_error);
-                } else {
-                    error_log("Video successfully deleted with ID: " . $video_id);
-                }
-            } else {
-                // If 'videoInput' is not set, log that as well
-                error_log("No videoInput received in the request.");
-            }
+            // Deletes the video_id then checks for errors
+            $this->delete_data($videoIsPosting);
+            $this->check_for_sql_err($video_id);
+            
             wp_redirect(add_query_arg('message', 'video_deleted', wp_get_referer()));
             exit;
         }
