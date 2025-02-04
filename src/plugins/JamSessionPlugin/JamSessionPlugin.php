@@ -333,9 +333,15 @@
                                     const commentText = document.createElement("p");
                                     commentText.textContent = commentTexts[index2]; 
 
+                                    const commentHr =document.createElement("hr");
+                                    commentHr.style = "width:80%";
+                                    commentHr.color = "lightGray";
+
+
                                     commentDiv.appendChild(commentUserNameLabel);
                                     commentDiv.appendChild(commentDatePara);
                                     commentDiv.appendChild(commentText);
+                                    commentDiv.appendChild(commentHr);
 
                                     commentsDiv.appendChild(commentDiv);
                                     
