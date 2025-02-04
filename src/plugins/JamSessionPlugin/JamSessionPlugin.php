@@ -173,6 +173,8 @@
         global $wpdb;
         ob_start();
         $table_name = $wpdb->prefix .'blog_post';
+        $current_user = wp_get_current_user();
+        $user_id = $current_user->ID;
 
         //Get the entries for text, title, user, and date
         $blog_texts = $this->pull_data("blog_text", $table_name);
@@ -202,6 +204,7 @@
             var blogAuthors = <?php echo json_encode($blog_authors) ?> ;
             var datesPosted = <?php echo json_encode($dates_posted) ?> ;
             var blogLikes = <?php echo json_encode($blog_likes) ?> ;
+            var currentUser = <?php echo json_encode($user_id) ?>;
 
             //Reverses the entries of the arrays
             blogIds.reverse();
@@ -253,9 +256,14 @@
                 postDiv.appendChild(authorLabel);
                 postDiv.appendChild(datePara);
                 postDiv.appendChild(textPara);
-                postDiv.appendChild(likeButton);
-                postDiv.appendChild(likeCount);
-                postDiv.appendChild(commentButton);
+
+
+                
+                if(!currentUser == '0'){
+                    postDiv.appendChild(likeButton);
+                    postDiv.appendChild(likeCount);
+                    postDiv.appendChild(commentButton);
+                }
 
                 blogContainer.appendChild(postDiv);
 
