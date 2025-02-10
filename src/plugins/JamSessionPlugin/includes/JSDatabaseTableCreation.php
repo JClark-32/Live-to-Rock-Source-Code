@@ -1,5 +1,6 @@
 <?php
-    global $wpdb;
+    function create_db_tables(){
+        global $wpdb;
         $table_name = $wpdb->prefix .'blog_post';
         $sql = "CREATE TABLE IF NOT EXISTS $table_name(\n"
         . "    id INT(9) NOT NULL AUTO_INCREMENT,\n"
@@ -38,4 +39,5 @@
         dbDelta($sql);
         dbDelta($likes_sql);
         dbDelta($comments_sql);
+    }
 ?>

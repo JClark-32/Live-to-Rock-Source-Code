@@ -14,10 +14,13 @@
 
     //Constructer classes that initialize functions
     public function __construct(){
+        require_once 'includes/JSDatabaseCalls.php';
+        require_once 'includes/JSDatabaseTableCreation.php';
         add_shortcode('ltr-blog-submission', array( $this,'empty_shortcode') );
         add_shortcode('ltr-blogs', array( $this,'show_blogs') );
         add_action('plugins_loaded', array( $this,'wporg_add_submit_post_ability') );
         add_action('init', array( $this,'blog_id') );
+        //add_action('init', array( $this,'enqueue_database_calls'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_action('wp_ajax_like_ajax_request', array($this,'like_ajax_request'));
         add_action('wp_ajax_comment_ajax_request', array($this,'comment_ajax_request'));
@@ -69,11 +72,6 @@
     <?php
     return ob_get_clean();
     }
-
-    function create_db_tables($table_name){
-        include 'JSDatabaseTableCreation.php';
-    }
-
     public function blog_id(){
         global $wpdb;
 
@@ -93,7 +91,7 @@
             
 
             $table_name = $wpdb->prefix . 'blog_post';
-            $this->create_db_tables($table_name);
+            create_db_tables();
 
             $current_user = wp_get_current_user();
             $username = $current_user->user_login;
@@ -143,12 +141,12 @@
         $user_id = $current_user->ID;
 
         //Get the entries for text, title, user, and date
-        $blog_texts = $this->pull_data("blog_text", $table_name);
-        $blog_titles = $this->pull_data("blog_title", $table_name);
-        $blog_ids = $this->pull_data("id",$table_name);
+        $blog_texts = pull_data("blog_text", $table_name);
+        $blog_titles = pull_data("blog_title", $table_name);
+        $blog_ids = pull_data("id",$table_name);
         //$user_names = $this->pull_data("user_posted", $table_name);
-        $blog_authors = $this->pull_data("blog_author",$table_name);
-        $dates_posted = $this->pull_data("date_posted", $table_name);
+        $blog_authors = pull_data("blog_author",$table_name);
+        $dates_posted = pull_data("date_posted", $table_name);
         $blog_likes = [];
         
         foreach ($blog_ids as $value) {
@@ -279,15 +277,6 @@
             $wpdb->query($deleteQuery);
         }
         die();
-    }
-
-    private function pull_data($columnName, $tableName){
-        global $wpdb;
-        $return_value = $wpdb->get_col("
-            SELECT $columnName
-            FROM $tableName"
-        );
-        return $return_value;
     }
 }
 new JamSession();
