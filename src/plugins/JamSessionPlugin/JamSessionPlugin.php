@@ -71,7 +71,7 @@
     }
 
     function create_db_tables($table_name){
-        include 'databaseTableCreation.php';
+        include 'JSDatabaseTableCreation.php';
     }
 
     public function blog_id(){
