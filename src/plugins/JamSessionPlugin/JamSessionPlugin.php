@@ -179,63 +179,20 @@
         return ob_get_clean();
     }
     public function comment_ajax_request(){
-        global $wpdb;
-
-        $comment_table_name = $wpdb -> prefix . 'blog_post_comments';
-        $current_user = wp_get_current_user();
-        $username = $current_user->user_login;
 
         if(isset($_REQUEST)){
             $blog_id=$_REQUEST['postID'];
             $comment=$_REQUEST['comment'];
         }
 
-        $wpdb->insert(
-            $comment_table_name,
-            array(
-                'user_commented' => $username,
-                'blog_id' => $blog_id,
-                'comment_text' => $comment
-            ),
-            array(
-                '%s', // comment_author
-                '%d', // blog_title
-                '%s', // comment_text 
-            )
-        );
+        insert_into_comment_table($comment, $blog_id);
         die();
     }
 
     public function comments_clicked_ajax_request(){
-        global $wpdb;
-
-        $table_name = $wpdb->prefix .'blog_post_comments';
-
         if(isset($_REQUEST)){
             $postID=$_REQUEST['postID'];
-            
-            $commentTextsQuery = "SELECT comment_text FROM $table_name WHERE blog_id='$postID'";
-            $commentUserNamesQuery = "SELECT user_commented FROM $table_name WHERE blog_id='$postID'";
-            $commentDatesPostedQuery = "SELECT date_posted FROM $table_name WHERE blog_id='$postID'";
-            $commentIdsQuery = "SELECT id FROM $table_name WHERE blog_id='$postID'";
-
-            $comment_texts = $wpdb->get_col($commentTextsQuery);
-            $comment_user_names = $wpdb->get_col($commentUserNamesQuery);
-            $comment_ids = $wpdb->get_col($commentIdsQuery);
-            $comment_dates_posted = $wpdb->get_col($commentDatesPostedQuery);
-
-            $comment_texts = array_reverse($comment_texts);
-            $comment_user_names = array_reverse($comment_user_names);
-            $comment_ids = array_reverse($comment_ids);
-            $comment_dates_posted = array_reverse($comment_dates_posted);
-
-            $comments = [
-                "comment_ids" => $comment_ids,
-                "comment_user_names" => $comment_user_names,
-                "comment_dates_posted" => $comment_dates_posted,
-                "comment_texts" => $comment_texts
-            ];
-
+            $comments = get_blog_comments($postID);
             echo json_encode($comments);
         }
 
@@ -243,9 +200,6 @@
     }
 
     public function like_ajax_request(){
-        global $wpdb;
-
-        $likes_table_name = $wpdb->prefix . 'blog_post_likes';
         $current_user = wp_get_current_user();
         $username = $current_user->user_login;
 
@@ -254,27 +208,15 @@
             $blog_id = $postID;
         }
 
-        $checkQuery = "SELECT user_liked FROM $likes_table_name WHERE user_liked='$username' AND blog_id='$blog_id'";
-        $results = $wpdb->query($checkQuery);
+        $results = check_if_user_liked($blog_id);
         
         if ($results==0){
             echo "liked";
-            $wpdb->insert(
-                $likes_table_name,
-                array(
-                    'user_liked' => $username,
-                    'blog_id' => $blog_id
-                ),
-                array(
-                    '%s', // blog_author
-                    '%d', // blog_title
-                )
-            );
+            insert_into_like_table($username, $blog_id);
         }
         else{
             echo "unliked";
-            $deleteQuery = "DELETE FROM $likes_table_name WHERE user_liked='$username' AND blog_id='$blog_id'";
-            $wpdb->query($deleteQuery);
+            delete_from_like_table($username, $blog_id);
         }
         die();
     }
