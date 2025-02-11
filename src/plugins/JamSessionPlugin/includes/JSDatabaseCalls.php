@@ -1,9 +1,10 @@
 <?php
-    function pull_data($columnName, $tableName){
+    function pull_data($columnName){
         global $wpdb;
+        $blog_table_name = $wpdb->prefix.'blog_post';
         $return_value = $wpdb->get_col("
             SELECT $columnName
-            FROM $tableName"
+            FROM $blog_table_name"
         );
         return $return_value;
     }
@@ -89,5 +90,39 @@
                 '%s', // comment_text 
             )
         );
+        
+    }
+    function insert_into_blog_table($blog_author, $blog_text, $blog_title){
+        global $wpdb;
+        $blog_table_name = $wpdb->prefix . 'blog_post';
+        $current_user = wp_get_current_user();
+        $username = $current_user->user_login;
+
+        $wpdb->insert(
+            $blog_table_name,
+            array(
+                'user_posted' => $username,
+                'blog_title' => $blog_title,
+                'blog_text' => $blog_text,
+                'blog_author' => $blog_author
+            ),
+            array(
+                '%s', // user_posted
+                '%s', // blog_author
+                '%s', // blog_title
+                '%s'  // blog_text
+            )
+        );
+        if ($wpdb->last_error) {
+            echo "\nError creating table " . $wpdb->last_error . "\nContact admin.";
+        }
+    }
+
+    function get_like_count($post_id){
+        global $wpdb;
+        $likes_table_name = $wpdb->prefix . 'blog_post_likes';
+        $LikeCountQuery = "SELECT user_liked FROM $likes_table_name WHERE blog_id='$value'";
+        $results = $wpdb->query($LikeCountQuery);
+        return $results;
     }
 ?>

@@ -73,8 +73,6 @@
     return ob_get_clean();
     }
     public function blog_id(){
-        global $wpdb;
-
         // check if request was made & if from correct spot
         if ($_SERVER['REQUEST_METHOD'] === 'POST'  && isset($_POST['ltr-blog-text'])) {
 
@@ -89,34 +87,11 @@
                 echo "Error";
             }
             
-
-            $table_name = $wpdb->prefix . 'blog_post';
             create_db_tables();
-
-            $current_user = wp_get_current_user();
-            $username = $current_user->user_login;
 
             if ($post_blog_button) {
                 // insert data
-                $wpdb->insert(
-                    $table_name,
-                    array(
-                        'user_posted' => $username,
-                        'blog_title' => $blog_title,
-                        'blog_text' => $blog_text,
-                        'blog_author' => $blog_author
-                    ),
-                    array(
-                        '%s', // user_posted
-                        '%s', // blog_author
-                        '%s', // blog_title
-                        '%s'  // blog_text
-                    )
-                );
-            }
-
-            if ($wpdb->last_error) {
-                echo "\nError creating table " . $wpdb->last_error . "\nContact admin.";
+                insert_into_blog_table($blog_author,$blog_text,$blog_title);
             }
 
             wp_redirect($_SERVER['REQUEST_URI']);
@@ -134,26 +109,22 @@
     }
   
     public function show_blogs( ){
-        global $wpdb;
         ob_start();
-        $table_name = $wpdb->prefix .'blog_post';
+
         $current_user = wp_get_current_user();
         $user_id = $current_user->ID;
 
         //Get the entries for text, title, user, and date
-        $blog_texts = pull_data("blog_text", $table_name);
-        $blog_titles = pull_data("blog_title", $table_name);
-        $blog_ids = pull_data("id",$table_name);
-        //$user_names = $this->pull_data("user_posted", $table_name);
-        $blog_authors = pull_data("blog_author",$table_name);
-        $dates_posted = pull_data("date_posted", $table_name);
+        $blog_texts = pull_data("blog_text");
+        $blog_titles = pull_data("blog_title");
+        $blog_ids = pull_data("id");
+        //$user_names = pull_data("user_posted");
+        $blog_authors = pull_data("blog_author");
+        $dates_posted = pull_data("date_posted");
         $blog_likes = [];
         
         foreach ($blog_ids as $value) {
-            $likes_table_name = $wpdb->prefix . 'blog_post_likes';
-            $LikeCountQuery = "SELECT user_liked FROM $likes_table_name WHERE blog_id='$value'";
-            $results = $wpdb->query($LikeCountQuery);
-
+            $results = get_like_count($value);
             array_push($blog_likes, $results);
         };
 
