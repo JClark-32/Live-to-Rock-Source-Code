@@ -17,6 +17,15 @@ class LifePerformances {
 
     // METHODS
     public function __construct() {
+
+        require_once 'InsertVideoIDData.php';
+        require_once 'CheckSubmitButton.php';
+        require_once 'EnterVideoData.php';
+        require_once 'CheckSQLError.php';
+        require_once 'SendEmailToAdmin.php';
+        require_once 'DeleteVideo.php';
+        require_once 'ApproveVideo.php';
+
         // Load assets ----------
         add_action('wp_enqueue_scripts', array( $this, 'load_assets' ) );
 
@@ -94,7 +103,7 @@ class LifePerformances {
             }
         
             // Get video ID from YouTube URL using regular expression
-            $video_id = $this->check_for_post($submitIsPosting, $video_url); 
+            $video_id = check_for_post($submitIsPosting, $video_url); 
 
             if ($video_id) {
                 $table_name = $wpdb->prefix . 'video_submission';
@@ -117,45 +126,16 @@ class LifePerformances {
                 }
 
                 // Insert data if able
-                $this->enter_data_if_able($submitIsPosting, $table_name, $video_id);
+                enter_data_if_able($submitIsPosting, $video_id);
 
                 // Send email when a new video is submitted
-                $this->send_video_submission_email($video_url, $video_id); // Send email
+                send_video_submission_email($video_url, $video_id); // Send email
             } else {
                 error_log("Error: no video ID.");
             }
         
             wp_redirect($_SERVER['REQUEST_URI']);
             exit;
-        }
-    }
-
-    // Insert data into the database
-    function insert_data($table_name, $video_id) {
-        global $wpdb;
-        $wpdb->insert($table_name, array('submission_text' => $video_id), NULL);
-    }
-
-    // Check if submit is posting
-    function check_for_post($submitIsPosting, $video_url) {
-        if ($submitIsPosting) {
-            preg_match('/[\\?\\&]v=([^\\?\\&]+)/', $video_url, $matches);
-            return $matches[1];
-        } else {
-            error_log("Submit button is not posting");
-        }
-    }
-
-    // Enter data into the database if able
-    function enter_data_if_able($submitIsPosting, $table_name, $video_id) {
-        global $wpdb;
-
-        if ($submitIsPosting) {
-            // Data is inserted into the created or existing table
-            $this->insert_data($table_name, $video_id);
-        }
-        if ($wpdb->last_error) {
-            error_log("Error creating table: " . $wpdb->last_error . "Contact admin.");
         }
     }
 
@@ -179,7 +159,7 @@ class LifePerformances {
                 ));
     
                 // Check for SQL errors
-                $this->check_for_sql_err($video_id);
+                check_for_sql_err($video_id);
             } else {
                 error_log("No videoInput received in the request.");
             }
@@ -187,18 +167,6 @@ class LifePerformances {
             exit;
         }
         ob_get_clean();
-    }
-
-    // Check for SQL errors
-    function check_for_sql_err($video_id) {
-        global $wpdb;
-
-        // Check for any SQL errors
-        if ($wpdb->last_error) {
-            error_log("Error deleting video: " . $wpdb->last_error);
-        } else {
-            error_log("Video successfully deleted with ID: " . $video_id);
-        }
     }
 
     public function show_videos() {
@@ -278,72 +246,16 @@ class LifePerformances {
         return ob_get_clean();
     }
 
-    // Send email when a new video is submitted
-    public function send_video_submission_email($video_url, $video_id) {
-        $to = 'kcweaver2@bsu.edu';
-        $subject = 'New Video Submitted for Life Performances';
-        $approve_url = add_query_arg('approve_video', $video_id, get_site_url());
-        $delete_url = add_query_arg('delete_video', $video_id, get_site_url());
-        $message = 'A new video has been submitted for the Life Performances plugin. Here is the YouTube URL: ' . $video_url . '<br><br>';
-        $message .= 'To approve the video, click <a href="' . esc_url($approve_url) . '">Approve</a><br>';
-        $message .= 'To delete the video, click <a href="' . esc_url($delete_url) . '">Delete</a>';
-        $headers = array('Content-Type: text/html; charset=UTF-8');
-
-        $mail_sent = wp_mail($to, $subject, $message, $headers);
-
-        if ($mail_sent) {
-            $this->email_status = 'Email sent successfully!';
-        } else {
-            $this->email_status = 'Failed to send email.';
+    public function handle_video_actions() {
+        if (isset($_GET['approve_video']) && !isset($_GET['delete_video'])) {
+            // Approve video if 'approve_video' query parameter is set, and 'delete_video' is not present
+            $video_id = sanitize_text_field($_GET['approve_video']);
+            approve_video($video_id);
+        } elseif (isset($_GET['delete_video']) && !isset($_GET['approve_video'])) {
+            // Delete video if 'delete_video' query parameter is set, and 'approve_video' is not present
+            $video_id = sanitize_text_field($_GET['delete_video']);
+            delete_video($video_id);
         }
-    }
-
-public function handle_video_actions() {
-    if (isset($_GET['approve_video']) && !isset($_GET['delete_video'])) {
-        // Approve video if 'approve_video' query parameter is set, and 'delete_video' is not present
-        $video_id = sanitize_text_field($_GET['approve_video']);
-        $this->approve_video($video_id);
-    } elseif (isset($_GET['delete_video']) && !isset($_GET['approve_video'])) {
-        // Delete video if 'delete_video' query parameter is set, and 'approve_video' is not present
-        $video_id = sanitize_text_field($_GET['delete_video']);
-        $this->delete_video($video_id);
-    }
-}
-
-    
-    // Approve the video
-    public function approve_video($video_id) {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'video_submission';
-        
-        // Check if the video exists and update the approval status to 1 (approved)
-        $wpdb->update(
-            $table_name,
-            array('approved' => 1), // Set approved to 1
-            array('submission_text' => $video_id),
-            array('%d'),
-            array('%s')
-        );
-        
-        // Redirect to a page after approval, e.g., back to the videos page
-        wp_redirect(get_site_url() . '/life-performances'); // Update this URL as necessary
-        exit;
-    }
-    
-    // Delete the video
-    public function delete_video($video_id) {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'video_submission';
-        
-        // Check if the video exists and delete it
-        $wpdb->query($wpdb->prepare(
-            "DELETE FROM $table_name WHERE submission_text = %s",
-            $video_id
-        ));
-    
-        // Redirect to a page after deletion, e.g., back to the videos page
-        wp_redirect(get_site_url() . '/life-performances'); // Update this URL as necessary
-        exit;
     }
     
     // Display email status
