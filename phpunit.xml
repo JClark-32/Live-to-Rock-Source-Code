@@ -13,8 +13,8 @@
          failOnRisky="true"
          failOnWarning="true">
     <testsuites>
-        <testsuite name="default">
-            <directory>tests/Unit</directory>
+        <testsuite name="Plugin Tests">
+            <directory>./tests/Unit</directory>
         </testsuite>
     </testsuites>
 
