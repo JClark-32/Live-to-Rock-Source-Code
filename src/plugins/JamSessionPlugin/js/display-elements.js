@@ -107,7 +107,7 @@
 
 
             jQuery(document).ready(function($){
-                var comment_texts = Array;
+                var commentTexts = Array;
                 var userCommented = Array;
                 var commentsDatePosted = Array;
                 var commentIds = Array;
