@@ -33,7 +33,8 @@
             datePara.style.color = "gray";
             datePara.innerHTML = `<small>${datesPosted[index]}</small>`;
             
-            const textPara = document.createElement("p");
+            const textPara = document.createElement("pre");
+            textPara.style = "white-space: pre-wrap; word-break: keep-all;"
             textPara.textContent = blogText;
     
             const likeButton = document.createElement("button");
