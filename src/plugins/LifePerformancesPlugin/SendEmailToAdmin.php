@@ -12,9 +12,9 @@ function send_video_submission_email($video_url, $video_id) {
     $mail_sent = wp_mail($to, $subject, $message, $headers);
 
     if ($mail_sent) {
-        $this->email_status = 'Email sent successfully!';
+        $email_status = 'Email sent successfully!';
     } else {
-        $this->email_status = 'Failed to send email.';
+        $email_status = 'Failed to send email.';
     }
 }
 ?>
