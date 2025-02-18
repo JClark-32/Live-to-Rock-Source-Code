@@ -16,10 +16,10 @@ final class GetVideoIDTest extends TestCase
         Brain\Monkey\setUp();
 
         // Mock the wpdb object using PHPUnit's createMock()
-        $this->wpdb = $this->createMock(\wpdb::class);
+        $this->$wpdb = $this->createMock(\wpdb::class);
 
         // Set the global wpdb to the mocked wpdb
-        $wpdb = $this->wpdb;
+        $wpdb = $this->$wpdb;
 
         // Mock $_POST superglobal
         $_SERVER['REQUEST_METHOD'] = 'POST';
