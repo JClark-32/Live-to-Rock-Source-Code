@@ -9,7 +9,6 @@
 
  // Prevent public user access to .php file
  if ( !defined('ABSPATH') ) { exit; }
-
  Class JamSession{
 
     //Constructer classes that initialize functions
@@ -47,13 +46,14 @@
     }
 
     //Loads the entry form for blog posting
+
     public function load_blog_submission(){
     ob_start();
     ?>
         <div id="ltr-blog-submission">
             <h2>Post a new blog?</h2>
             <p>Add blog text here</p>
-            <form id="ltr-blog-post" method="post">
+            <form action="" id="ltr-blog-post" method="post" onsubmit="document.getElementById('ltr-post-blog-button').disabled = true;">
                 <div class="input">
                     <div name="title">
                         <input name="ltr-title-text" type="text" placeholder="Enter Title">
@@ -61,11 +61,10 @@
                     <div name="author">
                         <input name="ltr-author-text" type="text" placeholder="Enter Author(s)">
                     </div>
-
                     <textarea name="ltr-blog-text"placeholder="Enter Text" required cols="80" rows = "6"></textarea>
                 </div>
                 <div id="ltr-submit">
-                    <button type="submit" name="ltr-post-blog-button" class="submit-btn">Post!</button>
+                    <button type="submit" id="ltr-post-blog-button" name="ltr-post-blog-button" class="submit-btn">Post!</button>
                 </div>
             </form>
         </div>
@@ -76,23 +75,13 @@
         // check if request was made & if from correct spot
         if ($_SERVER['REQUEST_METHOD'] === 'POST'  && isset($_POST['ltr-blog-text'])) {
 
-            $post_blog_button = isset($_POST['ltr-post-blog-button']);
-
-            // check again for post call
-            if ($post_blog_button) {
-                $blog_title = sanitize_text_field($_POST['ltr-title-text']);
-                $blog_text = sanitize_text_field($_POST['ltr-blog-text']);
-                $blog_author = sanitize_text_field($_POST['ltr-author-text']);
-            } else {
-                echo "Error";
-            }
-            
             create_db_tables();
 
-            if ($post_blog_button) {
-                // insert data
-                insert_into_blog_table($blog_author,$blog_text,$blog_title);
-            }
+            $blog_title = sanitize_text_field($_POST['ltr-title-text']);
+            $blog_text = sanitize_text_field($_POST['ltr-blog-text']);
+            $blog_author = sanitize_text_field($_POST['ltr-author-text']);
+                
+            insert_into_blog_table($blog_author,$blog_text,$blog_title); 
 
             wp_redirect($_SERVER['REQUEST_URI']);
             exit;
