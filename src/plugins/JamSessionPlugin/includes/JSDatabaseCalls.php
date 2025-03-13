@@ -121,7 +121,7 @@
     function get_like_count($post_id){
         global $wpdb;
         $likes_table_name = $wpdb->prefix . 'blog_post_likes';
-        $LikeCountQuery = "SELECT user_liked FROM $likes_table_name WHERE blog_id='$value'";
+        $LikeCountQuery = "SELECT user_liked FROM $likes_table_name WHERE blog_id='$post_id'";
         $results = $wpdb->query($LikeCountQuery);
         return $results;
     }
