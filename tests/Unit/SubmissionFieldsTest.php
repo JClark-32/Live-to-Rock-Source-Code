@@ -24,4 +24,5 @@ class SubmissionFieldsTest extends TestCase
         $this->assertStringContainsString('<input type="url" name="ltr-video-url" placeholder="YouTube URL" required>', $output);
         $this->assertStringContainsString('<button type="submit" name="ltr-submit-video-button" class="submit-btn">Submit!</button>', $output);
     }
+
 }
