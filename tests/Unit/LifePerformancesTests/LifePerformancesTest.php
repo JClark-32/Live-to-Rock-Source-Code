@@ -1,7 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 use Brain\Monkey\Functions;
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../../vendor/autoload.php';
 
 class LifePerformancesTest extends TestCase
 {
