@@ -25,6 +25,7 @@
             }
             echo "<button id='deleteButton$index' type='submit' name='ltr-delBtn' class='deleteBtn'>Delete?</button>";
             echo "<br>";
+            echo "<br>";
             echo "</form>";
         }
 

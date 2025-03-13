@@ -18,20 +18,20 @@ class LifePerformances {
     // METHODS
     public function __construct() {
 
-        require_once 'InsertVideoIDData.php';
-        require_once 'CheckSubmitButton.php';
-        require_once 'EnterVideoData.php';
-        require_once 'CheckSQLError.php';
-        require_once 'SendEmailToAdmin.php';
-        require_once 'DeleteVideo.php';
-        require_once 'ApproveVideo.php';
-        require_once 'SubmissionFields.php';
-        require_once 'GetVideoID.php';
-        require_once 'DeleteVideoFromDB.php';
-        require_once 'HandleVideosFromEmail.php';
-        require_once 'CreateVideosSpace.php';
-        require_once 'ApproveAddToDB.php';
-        require_once 'PrepareVideosToShow.php';
+        require_once 'includes/InsertVideoIDData.php';
+        require_once 'includes/CheckSubmitButton.php';
+        require_once 'includes/EnterVideoData.php';
+        require_once 'includes/CheckSQLError.php';
+        require_once 'includes/SendEmailToAdmin.php';
+        require_once 'includes/DeleteVideo.php';
+        require_once 'includes/ApproveVideo.php';
+        require_once 'includes/SubmissionFields.php';
+        require_once 'includes/GetVideoID.php';
+        require_once 'includes/DeleteVideoFromDB.php';
+        require_once 'includes/HandleVideosFromEmail.php';
+        require_once 'includes/CreateVideosSpace.php';
+        require_once 'includes/ApproveAddToDB.php';
+        require_once 'includes/PrepareVideosToShow.php';
 
         // Load assets ----------
         add_action('wp_enqueue_scripts', array( $this, 'load_assets' ) );
