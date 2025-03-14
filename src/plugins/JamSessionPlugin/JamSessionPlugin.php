@@ -22,6 +22,7 @@
         //add_action('init', array( $this,'enqueue_database_calls'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_action('wp_ajax_like_ajax_request', array($this,'like_ajax_request'));
+        add_action('wp_ajax_like_count_ajax_request', array($this,'like_count_ajax_request'));
         add_action('wp_ajax_comment_ajax_request', array($this,'comment_ajax_request'));
         add_action('wp_ajax_comments_clicked_ajax_request', array($this,'comments_clicked_ajax_request'));
         add_action('wp_head',array($this,'blog_ajaxurl'));
@@ -180,5 +181,28 @@
         }
         die();
     }
+
+    public function like_count_ajax_request(){
+        $current_user = wp_get_current_user();
+        $username = $current_user->user_login;
+
+        
+        if(isset($_REQUEST)){
+            $postID=$_REQUEST['postID'];
+            $blog_id = $postID;
+        }
+        
+
+        $results = check_if_user_liked($blog_id);
+        
+        if ($results==0){
+            echo "unliked";
+        }
+        else{
+            echo "liked";
+        }
+        die();
+    }
+
 }
 new JamSession();

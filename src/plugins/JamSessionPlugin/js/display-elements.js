@@ -36,6 +36,10 @@
             const textPara = document.createElement("pre");
             textPara.style = "white-space: pre-wrap; word-break: keep-all;"
             textPara.textContent = blogText;
+            console.log(blogText);
+
+            const actionDiv = document.createElement("div");
+            actionDiv.style.marginBottom = "1rem";
     
             const likeButton = document.createElement("button");
             likeButton.type = "button";
@@ -58,17 +62,46 @@
             postDiv.appendChild(authorLabel);
             postDiv.appendChild(datePara);
             postDiv.appendChild(textPara);
-    
-    
             
             if(!currentUser == '0'){
-                postDiv.appendChild(likeButton);
-                postDiv.appendChild(likeCount);
-                postDiv.appendChild(commentButton);
+                actionDiv.appendChild(likeButton);
+                likeColor();
+                actionDiv.appendChild(likeCount);
+                actionDiv.appendChild(commentButton);
+                postDiv.append(actionDiv);
             }
     
             blogContainer.appendChild(postDiv);    
-    
+        
+        
+        function likeColor(){
+            jQuery(document).ready(function($){
+                var postId = blogIds[index];
+                $.ajax({
+                    url:ajaxurl,
+                    data:{
+                        'action':'like_count_ajax_request',
+                        'postID' :postId
+                    },
+                    success:function(data){
+                        if(data == "liked"){
+//                            window.alert("yes");
+                            likeCount.style.color = "red";
+                        }
+                        else if(data == "unliked"){
+//                            window.alert("no");
+                            likeCount.style.color = "black";
+                        }
+                    },
+                    error:function(errorThrown){
+                        window.alert("errorThrown");
+                    }
+                })
+            })
+            var blogPostId = blogIds[index];
+            console.log(blogPostId+likeCount.color);
+        }
+        
         function likeClick(){
             jQuery(document).ready(function($){
                 var postId = blogIds[index];
@@ -81,9 +114,11 @@
                     success:function(data){
                         if(data == "liked"){
                             likeCount.textContent=parseInt(likeCount.textContent)+1;
+                            likeCount.style.color = "red";
                         }
                         else if(data == "unliked"){
                             likeCount.textContent=parseInt(likeCount.textContent)-1;
+                            likeCount.style.color = "black";
                         }
                     },
                     error:function(errorThrown){
@@ -99,13 +134,17 @@
 
         function commentClick(){
             var commentsDiv = document.createElement("div");
+            commentsDiv.style.border = "2px solid LightGray";
+            commentsDiv.style.padding="1rem";
+            commentsDiv.style.borderRadius = "15px";
+
             commentsDiv.id = "blog-comments"+blogIds[index];
 
             var input = document.createElement("input");
             input.type="text";
             input.id = "blog-comment-input";
             input.name="blog-commentInput";
-
+            input.style.marginBottom="1rem";
 
             jQuery(document).ready(function($){
                 var commentTexts = Array;
@@ -129,32 +168,36 @@
 
 
                         commentIds.forEach((commentId, index2) => {
-                            
                             const commentDiv = document.createElement("div");
-                            commentDiv.classList.add("comment"+blogIds[index]+commentIds[index2]);
-
+                            //commentDiv.id = "comment"+blogIds[index]+commentIds[index2];
+                            //commentDiv.classList.add("JamSession-Blog-Comment");
+                            //commentDiv.style.color = "red";
+                            commentDiv.className = "JamSession-Blog-Comment";
+                            
                             const commentUserNameLabel = document.createElement("label");
                             commentUserNameLabel.textContent = userCommented[index2];
-
+                            
                             const commentDatePara = document.createElement("p");
                             commentDatePara.style.color = "gray";
                             commentDatePara.innerHTML = `<small>${commentsDatePosted[index2]}</small>`;
-
+                            
                             const commentText = document.createElement("p");
                             commentText.textContent = commentTexts[index2]; 
-
+                            
                             const commentHr =document.createElement("hr");
                             commentHr.style = "width:80%";
                             commentHr.color = "lightGray";
-
-
+                            
+                            
+                            commentDiv.style.backgroundColor = "#ebebeb";
+                            commentDiv.style.borderRadius = "15px";
+                            commentDiv.style.padding="1rem";
+                            commentDiv.style.marginBottom="1rem";
                             commentDiv.appendChild(commentUserNameLabel);
                             commentDiv.appendChild(commentDatePara);
                             commentDiv.appendChild(commentText);
-                            commentDiv.appendChild(commentHr);
-
+                            //commentDiv.appendChild(commentHr);
                             commentsDiv.appendChild(commentDiv);
-                            
                         })
                     },
                     error:function(errorThrown){
@@ -162,7 +205,7 @@
                     }
                 })
             })
-        
+            
             
             input.addEventListener("keydown", function(event) {
                 if (event.key === "Enter") {
