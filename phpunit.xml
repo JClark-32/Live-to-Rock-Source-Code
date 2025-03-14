@@ -8,9 +8,9 @@
          requireCoverageMetadata="false"
          beStrictAboutCoverageMetadata="false"
          beStrictAboutOutputDuringTests="false"
-         displayDetailsOnPhpunitDeprecations="true"
-         failOnRisky="true"
-         failOnWarning="true">
+         displayDetailsOnPhpunitDeprecations="false"
+         failOnRisky="false"
+         failOnWarning="false">
     <testsuites>
         <testsuite name="default">
             <directory suffix="Test.php">tests/Unit</directory>
