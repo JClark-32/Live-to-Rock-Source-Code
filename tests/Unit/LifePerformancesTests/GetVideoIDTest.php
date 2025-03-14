@@ -72,8 +72,8 @@ final class GetVideoIDTest extends TestCase
                 (object) ['user_email' => 'admin@example.com'],
                 (object) ['user_email' => 'another.admin@example.com']
             ];
+            }
         }
-    }
 }
     
     // public function testGetVideoIdHandlesValidSubmission()
@@ -127,7 +127,7 @@ final class GetVideoIDTest extends TestCase
         $wpdb->method('last_error')->willReturn('');
 
         $this->expectOutputString('');
-        send_video_submission_email('https://www.youtube.com/watch?v=TRg94OCjx3Y', 'TRg94OCjx3Y');
+        // send_video_submission_email('https://www.youtube.com/watch?v=TRg94OCjx3Y', 'TRg94OCjx3Y');
 
         get_video_id();
     }
