@@ -20,4 +20,3 @@ function send_video_submission_email($video_url, $video_id) {
         $email_status = 'Failed to send email.';
     }
 }
-?>
