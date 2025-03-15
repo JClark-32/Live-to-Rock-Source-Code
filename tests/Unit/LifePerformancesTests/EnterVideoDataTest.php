@@ -30,7 +30,7 @@ class EnterVideoDataTest extends TestCase {
     public function test_does_not_insert_when_submitIsPosting_is_false() {
         global $wpdb;
 
-        // Ensure insert_data() is NOT called
+        // ensure insert_data() is NOT called
         $this->wpdb->expects($this->never())->method('insert');
 
         enter_data_if_able(false, 'video123');
@@ -39,7 +39,7 @@ class EnterVideoDataTest extends TestCase {
     public function test_inserts_when_submitIsPosting_is_true_and_no_error() {
         global $wpdb;
 
-        // Ensure insert() is called once
+        // ensure insert() is called once
         $this->wpdb->expects($this->once())->method('insert')
             ->with($this->stringContains('video_submission'), $this->anything());
 
@@ -59,14 +59,14 @@ class EnterVideoDataTest extends TestCase {
     }
 
     protected function expectErrorMessage($expectedMessage) {
-        // Override error_log function
+        // override error_log function
         $GLOBALS['error_log_mock'] = function ($message) use ($expectedMessage) {
             TestCase::assertStringContainsString($expectedMessage, $message);
         };
     }
 }
 
-// Override global error_log function
+// override global error_log function
 if (!function_exists('error_log')) {
     function error_log($message) {
         if (isset($GLOBALS['error_log_mock'])) {
