@@ -43,7 +43,7 @@
     
             const likeButton = document.createElement("button");
             likeButton.type = "button";
-            likeButton.textContent = "Like";
+            likeButton.textContent = "🖒 Like";
             likeButton.name = "blog-likeBtn";
             likeButton.onclick = likeClick;
     
@@ -66,7 +66,7 @@
             if(!currentUser == '0'){
                 actionDiv.appendChild(likeButton);
                 likeColor();
-                actionDiv.appendChild(likeCount);
+                //actionDiv.appendChild(likeCount);
                 actionDiv.appendChild(commentButton);
                 postDiv.append(actionDiv);
             }
@@ -86,11 +86,13 @@
                     success:function(data){
                         if(data == "liked"){
 //                            window.alert("yes");
-                            likeCount.style.color = "red";
+                            likeButton.textContent = "🖒 " + likeCount.textContent;
+                            likeButton.style.backgroundColor = "red";
                         }
                         else if(data == "unliked"){
 //                            window.alert("no");
-                            likeCount.style.color = "black";
+                            likeButton.textContent = "🖒 " + likeCount.textContent;
+                            likeButton.style.backgroundColor = "gray";
                         }
                     },
                     error:function(errorThrown){
@@ -114,11 +116,13 @@
                     success:function(data){
                         if(data == "liked"){
                             likeCount.textContent=parseInt(likeCount.textContent)+1;
-                            likeCount.style.color = "red";
+                            likeButton.textContent= "🖒 " + likeCount.textContent;
+                            likeButton.style.backgroundColor = "red";
                         }
                         else if(data == "unliked"){
                             likeCount.textContent=parseInt(likeCount.textContent)-1;
-                            likeCount.style.color = "black";
+                            likeButton.textContent= "🖒 " + likeCount.textContent;
+                            likeButton.style.backgroundColor = "gray";
                         }
                     },
                     error:function(errorThrown){
