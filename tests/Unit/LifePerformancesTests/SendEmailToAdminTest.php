@@ -50,37 +50,31 @@ class SendEmailToAdminTest extends TestCase {
     }
 
     public function testEmailSentSuccessfullyToSingleAdmin() {
-        // returns one admin with email admin@example.com
         send_video_submission_email('https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'dQw4w9WgXcQ'); // rick roll ;)
 
-        // Assert wp_mail() was called exactly once.
         $this->assertCount(1, $GLOBALS['wp_mail_params']);
 
         $mail = $GLOBALS['wp_mail_params'][0];
         $this->assertEquals('admin@example.com', $mail['to']);
         $this->assertEquals('New Video Submitted for Life Performances', $mail['subject']);
         $this->assertStringContainsString('https://www.youtube.com/watch?v=dQw4w9WgXcQ', $mail['message']);
-        // Verify that the approve and delete links contain the query arguments.
+
         $this->assertStringContainsString('approve_video=dQw4w9WgXcQ', $mail['message']);
         $this->assertStringContainsString('delete_video=dQw4w9WgXcQ', $mail['message']);
-        // Check that headers include the content type.
+
         $this->assertContains('Content-Type: text/html; charset=UTF-8', $mail['headers']);
     }
 
     public function testEmailFailure() {
-        // Simulate a failure by having wp_mail() return false.
         $GLOBALS['wp_mail_return'] = false;
         send_video_submission_email('https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'dQw4w9WgXcQ');
 
-        // wp_mail() should still be called.
         $this->assertNotEmpty($GLOBALS['wp_mail_params']);
         $mail = $GLOBALS['wp_mail_params'][0];
         $this->assertEquals('admin@example.com', $mail['to']);
-        // (Since the function doesn't return a status, we only check that wp_mail() was invoked correctly.)
     }
 
     public function testEmailSentToMultipleAdmins() {
-        // Override get_users to return two admin users.
         $GLOBALS['test_admin_users'] = [
             (object)['user_email' => 'admin1@example.com'],
             (object)['user_email' => 'admin2@example.com']
@@ -88,7 +82,6 @@ class SendEmailToAdminTest extends TestCase {
 
         send_video_submission_email('https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'dQw4w9WgXcQ');
 
-        // Assert that wp_mail() was called twice.
         $this->assertCount(2, $GLOBALS['wp_mail_params']);
 
         $mail1 = $GLOBALS['wp_mail_params'][0];
