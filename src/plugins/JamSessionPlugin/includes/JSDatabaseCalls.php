@@ -36,6 +36,30 @@
         );
     }
 
+    function delete_blog_post($blog_id){
+        global $wpdb;
+        $likes_table_name = $wpdb->prefix . 'blog_post_likes';
+        $comment_table_name = $wpdb->prefix .'blog_post_comments';
+        $blog_table_name = $wpdb->prefix .'blog_post';
+
+        $likeDeleteQuery = "DELETE FROM $likes_table_name WHERE blog_id='$blog_id'";
+        $commentDeleteQuery = "DELETE FROM $comment_table_name WHERE blog_id = '$blog_id'";
+        $blogDeleteQuery = "DELETE FROM $blog_table_name WHERE id = '$blog_id'";
+
+        $wpdb->query($likeDeleteQuery);
+        $wpdb->query($commentDeleteQuery);
+        $wpdb->query($blogDeleteQuery);
+    }
+
+    function delete_blog_comment($blog_id, $comment_id){
+        global $wpdb;
+
+        $comment_table_name = $wpdb->prefix .'blog_post_comments';
+
+        $commentDeleteQuery = "DELETE FROM $comment_table_name WHERE blog_id='$blog_id' and id='$comment_id'";
+        $wpdb->query($commentDeleteQuery);
+    }
+
     function delete_from_like_table($username, $blog_id){
         global $wpdb;
         $likes_table_name = $wpdb->prefix . 'blog_post_likes';
