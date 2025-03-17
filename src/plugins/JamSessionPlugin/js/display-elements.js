@@ -19,6 +19,7 @@
 
         blogTexts.forEach((blogText, index) => {
             const postDiv = document.createElement("div");
+            postDiv.id = ("blog-post"+blogIds[index]);
             postDiv.classList.add("blog-post"+blogIds[index]);
             
             const hr = document.createElement("hr");
@@ -60,6 +61,12 @@
             commentButton.textContent = "Comments";
             commentButton.name = "blog-commentBtn";
             commentButton.onclick = commentClick;
+
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.textContent = "Delete";
+            deleteButton.style.backgroundColor = "red";
+            deleteButton.onclick = deleteClick;
     
             postDiv.appendChild(hr);
             postDiv.appendChild(title);
@@ -73,9 +80,11 @@
                 likeColor();
                 //actionDiv.appendChild(likeCount);
                 actionDiv.appendChild(commentButton);
-                postDiv.append(actionDiv);
             }
-    
+
+            deleteButtonAppear();
+
+            postDiv.appendChild(actionDiv);
             blogContainer.appendChild(postDiv);    
         
         
@@ -107,6 +116,50 @@
             })
             var blogPostId = blogIds[index];
             console.log(blogPostId+likeCount.color);
+        }
+        function deleteClick(){
+            jQuery(document).ready(function($){
+                var postId = blogIds[index];
+                $.ajax({
+                    url:ajaxurl,
+                    data:{
+                        'action':'delete_button_pressed_ajax',
+                        'postID' :postId
+                    },
+                    success:function(data){
+                        currentBlogDiv = document.getElementById("blog-post"+blogIds[index]);
+                        currentBlogDiv.remove();
+                        alert("Successfully Deleted");
+                        
+                    },
+                    error:function(errorThrown){
+                        window.alert("errorThrown");
+                    }
+                })
+            })
+        }
+        
+        function deleteButtonAppear(){
+            jQuery(document).ready(function($){
+                $.ajax({
+                    url:ajaxurl,
+                    data:{
+                        'action':'add_delete_button_ajax',
+                    },
+                    success:function(data){
+                        if(data=="yes0"){
+                            actionDiv.appendChild(deleteButton);
+                            return 1;
+                        }
+                        else{
+                            return 0;
+                        }
+                    },
+                    error:function(errorThrown){
+                        window.alert("errorThrown");
+                    }
+                })
+            })
         }
         
         function likeClick(){
@@ -255,8 +308,8 @@
             var blogPostId = blogIds[index];
             console.log(blogPostId);
             console.log("Comment submitted:", comment);
-            console.log(activeUser.toString());
-            console.log("AAAAAAAAAA");
+            //console.log(activeUser.toString());
+            //console.log("AAAAAAAAAA");
             
             //Displays the users comment just after its been posted
             //Does not pull from database, created after submission
