@@ -1,2 +1,5 @@
 /vendor
 /.phpunit.cache
+/wordpress
+/src/plugins/JamSessionPlugin.zip
+/src/plugins/LifePerformancesPlugin.zip

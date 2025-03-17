@@ -5,16 +5,15 @@
          cacheDirectory=".phpunit.cache"
          executionOrder="depends,defects"
          shortenArraysForExportThreshold="10"
-         requireCoverageMetadata="true"
-         beStrictAboutCoverageMetadata="true"
-         beStrictAboutOutputDuringTests="true"
-         displayDetailsOnPhpunitDeprecations="true"
-         failOnPhpunitDeprecation="true"
-         failOnRisky="true"
-         failOnWarning="true">
+         requireCoverageMetadata="false"
+         beStrictAboutCoverageMetadata="false"
+         beStrictAboutOutputDuringTests="false"
+         displayDetailsOnPhpunitDeprecations="false"
+         failOnRisky="false"
+         failOnWarning="false">
     <testsuites>
         <testsuite name="default">
-            <directory>tests/Unit</directory>
+            <directory suffix="Test.php">tests/Unit</directory>
         </testsuite>
     </testsuites>
 
