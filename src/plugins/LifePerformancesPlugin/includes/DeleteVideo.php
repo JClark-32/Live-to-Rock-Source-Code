@@ -11,6 +11,9 @@ function delete_video($video_id) {
 
     // Redirect to a page after deletion, e.g., back to the videos page
     wp_redirect(get_site_url() . '/life-performances'); // Update this URL as necessary
-    exit;
+  
+    if (!defined('PHPUNIT_RUNNING')) {
+        exit; // should not affect code; prevents tests from exiting
+    }
 }
 ?>
