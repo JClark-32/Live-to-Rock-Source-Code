@@ -138,6 +138,8 @@
                 })
             })
         }
+
+        let can_delete = 0;
         
         function deleteButtonAppear(){
             jQuery(document).ready(function($){
@@ -149,11 +151,33 @@
                     success:function(data){
                         if(data=="yes0"){
                             actionDiv.appendChild(deleteButton);
-                            return 1;
+                            can_delete = 1;
                         }
                         else{
-                            return 0;
+                            can_delete = 0;
                         }
+                    },
+                    error:function(errorThrown){
+                        window.alert("errorThrown");
+                    }
+                })
+            })
+        }
+
+        function commentDelete(commentID){
+            jQuery(document).ready(function($){
+                var postId = blogIds[index];
+                $.ajax({
+                    url:ajaxurl,
+                    data:{
+                        'action':'comment_delete_ajax_request',
+                        'postID' :postId,
+                        'commentID' :commentID
+                    },
+                    success:function(data){
+                        alert("Comment Deleted");
+                        currentCommentDiv=document.getElementById("JamSession-Blog-Comment"+commentID);
+                        currentCommentDiv.remove();
                     },
                     error:function(errorThrown){
                         window.alert("errorThrown");
@@ -234,6 +258,7 @@
                         commentIds.forEach((commentId, index2) => {
                             const commentDiv = document.createElement("div");
                             commentDiv.className = "JamSession-Blog-Comment";
+                            commentDiv.id = "JamSession-Blog-Comment" + commentId;
                             
                             const commentUserNameLabel = document.createElement("label");
                             commentUserNameLabel.textContent = userCommented[index2];
@@ -245,6 +270,13 @@
                             const commentText = document.createElement("p");
                             commentText.textContent = commentTexts[index2]; 
                             
+                            
+                            const commentDeleteButton = document.createElement("button");
+                            commentDeleteButton.type = "button";
+                            commentDeleteButton.textContent = "Delete";
+                            commentDeleteButton.style.backgroundColor = "red";
+                            commentDeleteButton.onclick = function(){
+                                commentDelete(commentId);}
                             commentDiv.style.backgroundColor = "#ebebeb";
                             commentDiv.style.borderRadius = "15px";
                             commentDiv.style.padding="1rem";
@@ -252,7 +284,12 @@
                             commentDiv.appendChild(commentUserNameLabel);
                             commentDiv.appendChild(commentDatePara);
                             commentDiv.appendChild(commentText);
+                            if (can_delete==1){
+                                commentDiv.appendChild(commentDeleteButton);
+                            }
+
                             commentsDiv.appendChild(commentDiv);
+
                         })
                     },
                     error:function(errorThrown){

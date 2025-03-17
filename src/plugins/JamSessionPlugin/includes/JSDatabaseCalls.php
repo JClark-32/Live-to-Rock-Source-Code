@@ -51,8 +51,13 @@
         $wpdb->query($blogDeleteQuery);
     }
 
-    function delete_blog_comment($blog_id){
-        
+    function delete_blog_comment($blog_id, $comment_id){
+        global $wpdb;
+
+        $comment_table_name = $wpdb->prefix .'blog_post_comments';
+
+        $commentDeleteQuery = "DELETE FROM $comment_table_name WHERE blog_id='$blog_id' and id='$comment_id'";
+        $wpdb->query($commentDeleteQuery);
     }
 
     function delete_from_like_table($username, $blog_id){
