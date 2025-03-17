@@ -149,6 +149,8 @@
             input.id = "blog-comment-input";
             input.name="blog-commentInput";
             input.style.marginBottom="1rem";
+            input.maxLength = "280";
+            input.placeholder="Enter Comment";
 
             jQuery(document).ready(function($){
                 var commentTexts = Array;
