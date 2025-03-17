@@ -9,7 +9,7 @@
         foreach ($video_data as $index => $video) {
             $video_id = $video->submission_text;
             $approved = $video->approved;
-            echo "<form id='video-posted$index' method='POST'>";
+            echo "<form id='video-posted$index' method='POST' style='padding:1rem;'>";
             echo "<input type='hidden' name='videoInput' value='$video_id'>";
             wp_nonce_field('approve_video_nonce', 'approve_video_nonce');
             echo "<div id='player$index' class='youtube-player' loading='lazy'></div>";

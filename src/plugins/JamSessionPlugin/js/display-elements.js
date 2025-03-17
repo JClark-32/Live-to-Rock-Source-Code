@@ -188,11 +188,6 @@
                             const commentText = document.createElement("p");
                             commentText.textContent = commentTexts[index2]; 
                             
-                            const commentHr =document.createElement("hr");
-                            commentHr.style = "width:80%";
-                            commentHr.color = "lightGray";
-                            
-                            
                             commentDiv.style.backgroundColor = "#ebebeb";
                             commentDiv.style.borderRadius = "15px";
                             commentDiv.style.padding="1rem";
@@ -200,7 +195,6 @@
                             commentDiv.appendChild(commentUserNameLabel);
                             commentDiv.appendChild(commentDatePara);
                             commentDiv.appendChild(commentText);
-                            //commentDiv.appendChild(commentHr);
                             commentsDiv.appendChild(commentDiv);
                         })
                     },
@@ -234,6 +228,8 @@
         }
 
         function submitComment(comment) {
+            let activeUser = "test2";
+            const commentUserNameLabel = document.createElement("label");
             jQuery(document).ready(function($){
                 var postId = blogIds[index];
                 $.ajax({
@@ -244,6 +240,8 @@
                         'comment':comment
                     },
                     success:function(data){
+                        activeUser = data;
+                        commentUserNameLabel.textContent = activeUser;
                     },
                     error:function(errorThrown){
                         window.alert("errorThrown");
@@ -253,6 +251,39 @@
             var blogPostId = blogIds[index];
             console.log(blogPostId);
             console.log("Comment submitted:", comment);
+            console.log(activeUser.toString());
+            console.log("AAAAAAAAAA");
+            
+            //Displays the users comment just after its been posted
+            //Does not pull from database, created after submission
+            //Goes away after refreshed, or comments are reloaded
+
+            var currentCommentsDiv = document.getElementById("blog-comments"+blogPostId);
+            const tempCommentDiv = document.createElement("div");
+            tempCommentDiv.className = "JamSession-Blog-Comment";
+                        
+            const commentDatePara = document.createElement("p");
+            commentDatePara.style.color = "gray";
+            commentDatePara.innerHTML = `<small>Now</small>`;
+                        
+            const commentText = document.createElement("p");
+            commentText.textContent = comment; 
+
+            tempCommentDiv.style.backgroundColor = "#ebebeb";
+            tempCommentDiv.style.borderRadius = "15px";
+            tempCommentDiv.style.padding="1rem";
+            tempCommentDiv.style.marginBottom="1rem";
+
+            tempCommentDiv.appendChild(commentUserNameLabel);
+            tempCommentDiv.appendChild(commentDatePara);
+            tempCommentDiv.appendChild(commentText);
+
+            const currentInput = document.getElementById("blog-comment-input");
+
+            currentCommentsDiv.prepend(tempCommentDiv);
+            currentInput.remove();
+            currentCommentsDiv.prepend(currentInput);
+            
         }
     });
         
