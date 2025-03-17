@@ -33,6 +33,10 @@
             datePara.style.color = "gray";
             datePara.innerHTML = `<small>${datesPosted[index]}</small>`;
             
+            const textDiv = document.createElement("div");
+            textDiv.style.padding="1rem";
+            textDiv.innerHTML = blogText;
+
             const textPara = document.createElement("pre");
             textPara.style = "white-space: pre-wrap; word-break: keep-all;"
             textPara.textContent = blogText;
@@ -61,7 +65,8 @@
             postDiv.appendChild(title);
             postDiv.appendChild(authorLabel);
             postDiv.appendChild(datePara);
-            postDiv.appendChild(textPara);
+            //postDiv.appendChild(textPara);
+            postDiv.appendChild(textDiv);
             
             if(!currentUser == '0'){
                 actionDiv.appendChild(likeButton);
@@ -175,9 +180,6 @@
 
                         commentIds.forEach((commentId, index2) => {
                             const commentDiv = document.createElement("div");
-                            //commentDiv.id = "comment"+blogIds[index]+commentIds[index2];
-                            //commentDiv.classList.add("JamSession-Blog-Comment");
-                            //commentDiv.style.color = "red";
                             commentDiv.className = "JamSession-Blog-Comment";
                             
                             const commentUserNameLabel = document.createElement("label");

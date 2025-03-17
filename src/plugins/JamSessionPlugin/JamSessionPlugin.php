@@ -56,21 +56,28 @@
             <p>Add blog text here</p>
             <form action="" id="ltr-blog-post" method="post" onsubmit="document.getElementById('ltr-post-blog-button').disabled = true;">
                 <div class="input">
-                    <div name="title">
+                    <div name="title" style="padding:5px;">
                         <input name="ltr-title-text" type="text" placeholder="Enter Title">
                     </div>
-                    <div name="author">
+                    <div name="author" style="padding:5px;">
                         <input name="ltr-author-text" type="text" placeholder="Enter Author(s)">
                     </div>
-                    <textarea name="ltr-blog-text"placeholder="Enter Text" required cols="80" rows = "6"></textarea>
+                    <div style="padding:5px;">
+                        <?php
+                            $settings = array( 'textarea_name' => 'ltr-blog-text' );
+                            wp_editor( "Enter Text", "ltr-blog-text", $settings);
+                        ?>
+                    </div>
                 </div>
-                <div id="ltr-submit">
+                <div id="ltr-submit" style="padding:5px;">
                     <button type="submit" id="ltr-post-blog-button" name="ltr-post-blog-button" class="submit-btn">Post!</button>
                 </div>
             </form>
         </div>
     <?php
+    
     return ob_get_clean();
+    
     }
     public function blog_id(){
         // check if request was made & if from correct spot
@@ -79,7 +86,8 @@
             create_db_tables();
 
             $blog_title = sanitize_text_field($_POST['ltr-title-text']);
-            $blog_text = sanitize_text_field($_POST['ltr-blog-text']);
+            $blog_text = wp_kses_post($_POST['ltr-blog-text']);
+            //$blog_text = sanitize_text_field($_POST['ltr-blog-text']);
             $blog_author = sanitize_text_field($_POST['ltr-author-text']);
                 
             insert_into_blog_table($blog_author,$blog_text,$blog_title); 
@@ -140,13 +148,18 @@
         return ob_get_clean();
     }
     public function comment_ajax_request(){
-
+        global $wpdb;
+        $current_user = wp_get_current_user();
+        $username = $current_user->user_login;
+        
         if(isset($_REQUEST)){
             $blog_id=$_REQUEST['postID'];
             $comment=$_REQUEST['comment'];
         }
 
         insert_into_comment_table($comment, $blog_id);
+        echo $username;
+
         die();
     }
 
