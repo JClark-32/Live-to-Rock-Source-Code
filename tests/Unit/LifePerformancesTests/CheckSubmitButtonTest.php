@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../../../vendor/autoload.php';
-require_once __DIR__ . '/../../../src/plugins/LifePerformancesPlugin/CheckSubmitButton.php';
+require_once __DIR__ . '/../../../src/plugins/LifePerformancesPlugin/includes/CheckSubmitButton.php';
 
 Class CheckSubmitButtonTest extends TestCase {
  
@@ -13,9 +13,18 @@ Class CheckSubmitButtonTest extends TestCase {
     }
 
     protected function tearDown(): void {
+        parent::tearDown();
+
         if (file_exists($this->log_file)) {
             unlink($this->log_file);
         }
+
+        // Reset global variables between tests
+        global $wpdb;
+        $wpdb = null; // Clear mock object
+
+        $_POST = [];   // Reset POST data
+        $_SERVER = []; // Reset server variables
     }
 
     public function testCheckForPostNotPosting() {
