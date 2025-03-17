@@ -33,12 +33,21 @@
             datePara.style.color = "gray";
             datePara.innerHTML = `<small>${datesPosted[index]}</small>`;
             
-            const textPara = document.createElement("p");
+            const textDiv = document.createElement("div");
+            textDiv.style.padding="1rem";
+            textDiv.innerHTML = blogText;
+
+            const textPara = document.createElement("pre");
+            textPara.style = "white-space: pre-wrap; word-break: keep-all;"
             textPara.textContent = blogText;
+            console.log(blogText);
+
+            const actionDiv = document.createElement("div");
+            actionDiv.style.marginBottom = "1rem";
     
             const likeButton = document.createElement("button");
             likeButton.type = "button";
-            likeButton.textContent = "Like";
+            likeButton.textContent = "🖒 Like";
             likeButton.name = "blog-likeBtn";
             likeButton.onclick = likeClick;
     
@@ -56,18 +65,50 @@
             postDiv.appendChild(title);
             postDiv.appendChild(authorLabel);
             postDiv.appendChild(datePara);
-            postDiv.appendChild(textPara);
-    
-    
+            //postDiv.appendChild(textPara);
+            postDiv.appendChild(textDiv);
             
             if(!currentUser == '0'){
-                postDiv.appendChild(likeButton);
-                postDiv.appendChild(likeCount);
-                postDiv.appendChild(commentButton);
+                actionDiv.appendChild(likeButton);
+                likeColor();
+                //actionDiv.appendChild(likeCount);
+                actionDiv.appendChild(commentButton);
+                postDiv.append(actionDiv);
             }
     
             blogContainer.appendChild(postDiv);    
-    
+        
+        
+        function likeColor(){
+            jQuery(document).ready(function($){
+                var postId = blogIds[index];
+                $.ajax({
+                    url:ajaxurl,
+                    data:{
+                        'action':'like_count_ajax_request',
+                        'postID' :postId
+                    },
+                    success:function(data){
+                        if(data == "liked"){
+//                            window.alert("yes");
+                            likeButton.textContent = "🖒 " + likeCount.textContent;
+                            likeButton.style.backgroundColor = "red";
+                        }
+                        else if(data == "unliked"){
+//                            window.alert("no");
+                            likeButton.textContent = "🖒 " + likeCount.textContent;
+                            likeButton.style.backgroundColor = "gray";
+                        }
+                    },
+                    error:function(errorThrown){
+                        window.alert("errorThrown");
+                    }
+                })
+            })
+            var blogPostId = blogIds[index];
+            console.log(blogPostId+likeCount.color);
+        }
+        
         function likeClick(){
             jQuery(document).ready(function($){
                 var postId = blogIds[index];
@@ -80,9 +121,13 @@
                     success:function(data){
                         if(data == "liked"){
                             likeCount.textContent=parseInt(likeCount.textContent)+1;
+                            likeButton.textContent= "🖒 " + likeCount.textContent;
+                            likeButton.style.backgroundColor = "red";
                         }
                         else if(data == "unliked"){
                             likeCount.textContent=parseInt(likeCount.textContent)-1;
+                            likeButton.textContent= "🖒 " + likeCount.textContent;
+                            likeButton.style.backgroundColor = "gray";
                         }
                     },
                     error:function(errorThrown){
@@ -98,13 +143,19 @@
 
         function commentClick(){
             var commentsDiv = document.createElement("div");
+            commentsDiv.style.border = "2px solid LightGray";
+            commentsDiv.style.padding="1rem";
+            commentsDiv.style.borderRadius = "15px";
+
             commentsDiv.id = "blog-comments"+blogIds[index];
 
             var input = document.createElement("input");
             input.type="text";
             input.id = "blog-comment-input";
             input.name="blog-commentInput";
-
+            input.style.marginBottom="1rem";
+            input.maxLength = "280";
+            input.placeholder="Enter Comment";
 
             jQuery(document).ready(function($){
                 var commentTexts = Array;
@@ -128,32 +179,27 @@
 
 
                         commentIds.forEach((commentId, index2) => {
-                            
                             const commentDiv = document.createElement("div");
-                            commentDiv.classList.add("comment"+blogIds[index]+commentIds[index2]);
-
+                            commentDiv.className = "JamSession-Blog-Comment";
+                            
                             const commentUserNameLabel = document.createElement("label");
                             commentUserNameLabel.textContent = userCommented[index2];
-
+                            
                             const commentDatePara = document.createElement("p");
                             commentDatePara.style.color = "gray";
                             commentDatePara.innerHTML = `<small>${commentsDatePosted[index2]}</small>`;
-
+                            
                             const commentText = document.createElement("p");
                             commentText.textContent = commentTexts[index2]; 
-
-                            const commentHr =document.createElement("hr");
-                            commentHr.style = "width:80%";
-                            commentHr.color = "lightGray";
-
-
+                            
+                            commentDiv.style.backgroundColor = "#ebebeb";
+                            commentDiv.style.borderRadius = "15px";
+                            commentDiv.style.padding="1rem";
+                            commentDiv.style.marginBottom="1rem";
                             commentDiv.appendChild(commentUserNameLabel);
                             commentDiv.appendChild(commentDatePara);
                             commentDiv.appendChild(commentText);
-                            commentDiv.appendChild(commentHr);
-
                             commentsDiv.appendChild(commentDiv);
-                            
                         })
                     },
                     error:function(errorThrown){
@@ -161,7 +207,7 @@
                     }
                 })
             })
-        
+            
             
             input.addEventListener("keydown", function(event) {
                 if (event.key === "Enter") {
@@ -186,6 +232,8 @@
         }
 
         function submitComment(comment) {
+            let activeUser = "test2";
+            const commentUserNameLabel = document.createElement("label");
             jQuery(document).ready(function($){
                 var postId = blogIds[index];
                 $.ajax({
@@ -196,6 +244,8 @@
                         'comment':comment
                     },
                     success:function(data){
+                        activeUser = data;
+                        commentUserNameLabel.textContent = activeUser;
                     },
                     error:function(errorThrown){
                         window.alert("errorThrown");
@@ -205,6 +255,39 @@
             var blogPostId = blogIds[index];
             console.log(blogPostId);
             console.log("Comment submitted:", comment);
+            console.log(activeUser.toString());
+            console.log("AAAAAAAAAA");
+            
+            //Displays the users comment just after its been posted
+            //Does not pull from database, created after submission
+            //Goes away after refreshed, or comments are reloaded
+
+            var currentCommentsDiv = document.getElementById("blog-comments"+blogPostId);
+            const tempCommentDiv = document.createElement("div");
+            tempCommentDiv.className = "JamSession-Blog-Comment";
+                        
+            const commentDatePara = document.createElement("p");
+            commentDatePara.style.color = "gray";
+            commentDatePara.innerHTML = `<small>Now</small>`;
+                        
+            const commentText = document.createElement("p");
+            commentText.textContent = comment; 
+
+            tempCommentDiv.style.backgroundColor = "#ebebeb";
+            tempCommentDiv.style.borderRadius = "15px";
+            tempCommentDiv.style.padding="1rem";
+            tempCommentDiv.style.marginBottom="1rem";
+
+            tempCommentDiv.appendChild(commentUserNameLabel);
+            tempCommentDiv.appendChild(commentDatePara);
+            tempCommentDiv.appendChild(commentText);
+
+            const currentInput = document.getElementById("blog-comment-input");
+
+            currentCommentsDiv.prepend(tempCommentDiv);
+            currentInput.remove();
+            currentCommentsDiv.prepend(currentInput);
+            
         }
     });
         

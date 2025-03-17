@@ -29,7 +29,7 @@
         . "    user_commented VARCHAR(60) NOT NULL,\n"
         . "    date_posted DATETIME DEFAULT CURRENT_TIMESTAMP,\n"
         . "    blog_id INT(9),\n"
-        . "    comment_text TEXT,\n"
+        . "    comment_text VARCHAR(280),\n"
         . "    PRIMARY KEY(id),\n"
         . "    FOREIGN KEY(blog_id) REFERENCES $table_name(id)"
         . ");";
