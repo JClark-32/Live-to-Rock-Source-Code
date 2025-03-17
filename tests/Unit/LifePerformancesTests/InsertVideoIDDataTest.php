@@ -11,10 +11,7 @@ Class InsertVideoIDDataTest extends TestCase {
                            ->addMethods(['insert'])
                            ->getMock();
 
-        // Mock $wpdb->prefix to simulate WordPress database table prefix
         $this->wpdb->prefix = 'wp_';
-
-        // Assign the mock object to the global $wpdb
         $wpdb = $this->wpdb;
     }
 
@@ -22,7 +19,6 @@ Class InsertVideoIDDataTest extends TestCase {
         $video_id = 'abc123';
         $table_name = 'wp_video_submission';
 
-        // Expect `insert` to be called once with expected parameters
         $this->wpdb->expects($this->once())
             ->method('insert')
             ->with(
@@ -30,9 +26,8 @@ Class InsertVideoIDDataTest extends TestCase {
                 $this->equalTo(['submission_text' => $video_id]),
                 $this->equalTo(null)
             )
-            ->willReturn(1); // Simulate successful insert
+            ->willReturn(1); // successful insert
 
-        // Call function
         insert_data($video_id);
     }
 }
