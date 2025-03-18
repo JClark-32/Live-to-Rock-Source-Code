@@ -24,7 +24,10 @@
                 error_log("No videoInput received in the request.");
             }
             wp_redirect(add_query_arg('message', 'video_deleted', wp_get_referer()));
-            exit;
+            
+            if (!defined('PHPUNIT_RUNNING')) {
+                exit; // should not affect code; prevents tests from exiting
+            }
         }
         ob_get_clean();
     }
