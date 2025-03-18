@@ -19,6 +19,7 @@
 
         blogTexts.forEach((blogText, index) => {
             const postDiv = document.createElement("div");
+            postDiv.id = ("blog-post"+blogIds[index]);
             postDiv.classList.add("blog-post"+blogIds[index]);
             
             const hr = document.createElement("hr");
@@ -60,6 +61,12 @@
             commentButton.textContent = "Comments";
             commentButton.name = "blog-commentBtn";
             commentButton.onclick = commentClick;
+
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.textContent = "Delete";
+            deleteButton.style.backgroundColor = "red";
+            deleteButton.onclick = deleteClick;
     
             postDiv.appendChild(hr);
             postDiv.appendChild(title);
@@ -73,9 +80,11 @@
                 likeColor();
                 //actionDiv.appendChild(likeCount);
                 actionDiv.appendChild(commentButton);
-                postDiv.append(actionDiv);
             }
-    
+
+            deleteButtonAppear();
+
+            postDiv.appendChild(actionDiv);
             blogContainer.appendChild(postDiv);    
         
         
@@ -107,6 +116,74 @@
             })
             var blogPostId = blogIds[index];
             console.log(blogPostId+likeCount.color);
+        }
+        function deleteClick(){
+            jQuery(document).ready(function($){
+                var postId = blogIds[index];
+                $.ajax({
+                    url:ajaxurl,
+                    data:{
+                        'action':'delete_button_pressed_ajax',
+                        'postID' :postId
+                    },
+                    success:function(data){
+                        currentBlogDiv = document.getElementById("blog-post"+blogIds[index]);
+                        currentBlogDiv.remove();
+                        alert("Successfully Deleted");
+                        
+                    },
+                    error:function(errorThrown){
+                        window.alert("errorThrown");
+                    }
+                })
+            })
+        }
+
+        let can_delete = 0;
+        
+        function deleteButtonAppear(){
+            jQuery(document).ready(function($){
+                $.ajax({
+                    url:ajaxurl,
+                    data:{
+                        'action':'add_delete_button_ajax',
+                    },
+                    success:function(data){
+                        if(data=="yes0"){
+                            actionDiv.appendChild(deleteButton);
+                            can_delete = 1;
+                        }
+                        else{
+                            can_delete = 0;
+                        }
+                    },
+                    error:function(errorThrown){
+                        window.alert("errorThrown");
+                    }
+                })
+            })
+        }
+
+        function commentDelete(commentID){
+            jQuery(document).ready(function($){
+                var postId = blogIds[index];
+                $.ajax({
+                    url:ajaxurl,
+                    data:{
+                        'action':'comment_delete_ajax_request',
+                        'postID' :postId,
+                        'commentID' :commentID
+                    },
+                    success:function(data){
+                        alert("Comment Deleted");
+                        currentCommentDiv=document.getElementById("JamSession-Blog-Comment"+commentID);
+                        currentCommentDiv.remove();
+                    },
+                    error:function(errorThrown){
+                        window.alert("errorThrown");
+                    }
+                })
+            })
         }
         
         function likeClick(){
@@ -181,6 +258,7 @@
                         commentIds.forEach((commentId, index2) => {
                             const commentDiv = document.createElement("div");
                             commentDiv.className = "JamSession-Blog-Comment";
+                            commentDiv.id = "JamSession-Blog-Comment" + commentId;
                             
                             const commentUserNameLabel = document.createElement("label");
                             commentUserNameLabel.textContent = userCommented[index2];
@@ -192,6 +270,13 @@
                             const commentText = document.createElement("p");
                             commentText.textContent = commentTexts[index2]; 
                             
+                            
+                            const commentDeleteButton = document.createElement("button");
+                            commentDeleteButton.type = "button";
+                            commentDeleteButton.textContent = "Delete";
+                            commentDeleteButton.style.backgroundColor = "red";
+                            commentDeleteButton.onclick = function(){
+                                commentDelete(commentId);}
                             commentDiv.style.backgroundColor = "#ebebeb";
                             commentDiv.style.borderRadius = "15px";
                             commentDiv.style.padding="1rem";
@@ -199,7 +284,12 @@
                             commentDiv.appendChild(commentUserNameLabel);
                             commentDiv.appendChild(commentDatePara);
                             commentDiv.appendChild(commentText);
+                            if (can_delete==1){
+                                commentDiv.appendChild(commentDeleteButton);
+                            }
+
                             commentsDiv.appendChild(commentDiv);
+
                         })
                     },
                     error:function(errorThrown){
@@ -255,8 +345,8 @@
             var blogPostId = blogIds[index];
             console.log(blogPostId);
             console.log("Comment submitted:", comment);
-            console.log(activeUser.toString());
-            console.log("AAAAAAAAAA");
+            //console.log(activeUser.toString());
+            //console.log("AAAAAAAAAA");
             
             //Displays the users comment just after its been posted
             //Does not pull from database, created after submission

@@ -25,6 +25,9 @@
         add_action('wp_ajax_like_count_ajax_request', array($this,'like_count_ajax_request'));
         add_action('wp_ajax_comment_ajax_request', array($this,'comment_ajax_request'));
         add_action('wp_ajax_comments_clicked_ajax_request', array($this,'comments_clicked_ajax_request'));
+        add_action('wp_ajax_add_delete_button_ajax', array($this,'add_delete_button_ajax'));
+        add_action('wp_ajax_delete_button_pressed_ajax', array($this,'delete_button_pressed_ajax'));
+        add_action('wp_ajax_comment_delete_ajax_request', array($this,'comment_delete_ajax_request'));
         add_action('wp_head',array($this,'blog_ajaxurl'));
     }
     public function enqueue_scripts(){
@@ -105,6 +108,7 @@
             add_shortcode('ltr-blog-submission', array( $this,'load_blog_submission') );
         }
     }
+
   
     public function show_blogs( ){
         ob_start();
@@ -147,6 +151,28 @@
         echo '</div>';
         return ob_get_clean();
     }
+    
+    public function add_delete_button_ajax(){
+        if (current_user_can('edit_others_posts')){
+            echo("yes");
+        }
+        else{
+            echo("no");
+        }
+    }
+
+    public function delete_button_pressed_ajax(){
+        
+        if(isset($_REQUEST)){
+            $postID=$_REQUEST['postID'];
+            $blog_id = $postID;
+        }
+
+        delete_blog_post($blog_id);
+        die();
+    }
+    
+
     public function comment_ajax_request(){
         global $wpdb;
         $current_user = wp_get_current_user();
@@ -160,6 +186,16 @@
         insert_into_comment_table($comment, $blog_id);
         echo $username;
 
+        die();
+    }
+    
+
+    public function comment_delete_ajax_request(){
+        if(isset($_REQUEST)){
+            $postID=$_REQUEST['postID'];
+            $commentID=$_REQUEST['commentID'];
+        }
+        delete_blog_comment($postID, $commentID);
         die();
     }
 
