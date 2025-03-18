@@ -78,6 +78,53 @@ class DeleteVideoFromDBTest extends TestCase {
         parent::tearDown();
     }
 
+    public function testDeleteVideoIdWithVideoInput() {
+        global $wpdb;
+        $_POST['ltr-delBtn'] = 'Delete';
+        $_POST['videoInput'] = 'xvFZjo5PgG0'; // still a rick roll lol
+
+        $table_name = 'wp_video_submission';
+ 
+        $sql_template = "DELETE FROM $table_name 
+                    WHERE submission_text = %s";
+
+        $expected_prepared_sql = "DELETE FROM $table_name 
+                    WHERE submission_text = 'xvFZjo5PgG0'";
+
+        // normalize newlines
+        $normalize = function($str) {
+            return str_replace("\r\n", "\n", $str);
+        };
+
+        $wpdb->expects($this->once())
+            ->method('prepare')
+            ->with(
+                $this->callback(function($arg) use ($sql_template, $normalize) {
+                    return $normalize($arg) === $normalize($sql_template);
+                }),
+            $this->equalTo('xvFZjo5PgG0')
+        )
+        ->willReturn($expected_prepared_sql);
+
+        $wpdb->expects($this->once())
+            ->method('query')
+            ->with($this->equalTo($expected_prepared_sql));
+
+        ob_start();
+        delete_video_id();
+        ob_end_clean();
+
+        $logContents = file_get_contents($this->logFile);
+        $this->assertStringContainsString("Deleting video ID: xvFZjo5PgG0", $logContents);
+
+        $this->assertEquals('xvFZjo5PgG0', $GLOBALS['check_for_sql_err_called']);
+
+        $expected_redirect = add_query_arg('message', 'video_deleted', wp_get_referer());
+        $this->assertEquals($expected_redirect, $GLOBALS['wp_redirect']);
+
+        $this->assertTrue(true, 'Test reached the end successfully.'); // this is mostly to satisfy phpunit
+    }
+
     public function testDeleteVideoIdWithoutVideoInput() {
         global $wpdb;
         $_POST['ltr-delBtn'] = 'Delete';
