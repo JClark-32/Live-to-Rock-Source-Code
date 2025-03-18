@@ -20,10 +20,18 @@
             <directory suffix="Test.php">tests/Unit</directory>
         </testsuite>
     </testsuites>
-    <coverage processUncoveredFiles="true">
+    <coverage>
         <include>
-            <directory>src</directory>
+            <directory>src/plugins/LifePerformancesPlugin</directory>
+            <directory>src/plugins/JamSessionPlugin</directory>
         </include>
+        <exclude>
+            <directory>src/plugins/LifePerformancesPlugin/tests</directory>
+            <directory>src/plugins/LifePerformancesPlugin/vendor</directory>
+            <directory>src/plugins/LifePerformancesPlugin/wordpress</directory>
+            <directory>src/plugins/LifePerformancesPlugin/.vscode</directory>
+            <directory>src/plugins/LifePerformancesPlugin/coverage</directory>
+        </exclude>
     </coverage>
     <source ignoreIndirectDeprecations="true" restrictNotices="true" restrictWarnings="true">
         <include>
