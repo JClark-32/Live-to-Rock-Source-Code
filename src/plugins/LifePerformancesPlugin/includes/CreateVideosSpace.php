@@ -23,7 +23,7 @@
             if (!$approved && current_user_can('edit_others_posts')) {
                 echo "<button id='approveButton$index' type='submit' name='ltr-approveBtn' class='approveBtn'>Approve</button>";
             }
-            echo "<button id='deleteButton$index' type='submit' name='ltr-delBtn' class='deleteBtn'>Delete?</button>";
+            echo "<button id='deleteButton$index' type='submit' name='ltr-delBtn' class='deleteBtn' style='background-color:red'>Delete?</button>";
             echo "<br>";
             echo "<br>";
             echo "</form>";
