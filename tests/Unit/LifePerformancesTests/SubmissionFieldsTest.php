@@ -1,7 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../../../vendor/autoload.php';
-require_once __DIR__ . '/../../../src/plugins/LifePerformancesPlugin/SubmissionFields.php';
+require_once __DIR__ . '/../../../src/plugins/LifePerformancesPlugin/includes/SubmissionFields.php';
 
 class SubmissionFieldsTest extends TestCase
 {
@@ -21,7 +21,9 @@ class SubmissionFieldsTest extends TestCase
         $this->assertStringContainsString('<div id="ltr-video-submission">', $output);
         $this->assertStringContainsString('<h2>Post Your Life Performance?</h2>', $output);
         $this->assertStringContainsString('<form id="ltr-video-link" method="post">', $output);
+        $this->assertStringContainsString('<div class="input" style="padding:1rem;">', $output);
         $this->assertStringContainsString('<input type="url" name="ltr-video-url" placeholder="YouTube URL" required>', $output);
+        $this->assertStringContainsString('<div id="ltr-submit" style="padding:1rem;">', $output);
         $this->assertStringContainsString('<button type="submit" name="ltr-submit-video-button" class="submit-btn">Submit!</button>', $output);
     }
 

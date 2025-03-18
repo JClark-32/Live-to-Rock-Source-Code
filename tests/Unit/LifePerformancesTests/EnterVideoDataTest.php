@@ -1,7 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../../../vendor/autoload.php';
-require_once __DIR__ . '/../../../src/plugins/LifePerformancesPlugin/EnterVideoData.php';
+require_once __DIR__ . '/../../../src/plugins/LifePerformancesPlugin/includes/EnterVideoData.php';
 
 class EnterVideoDataTest extends TestCase {
     private $wpdb;
@@ -25,6 +25,17 @@ class EnterVideoDataTest extends TestCase {
 
         global $wpdb;
         $wpdb = $this->wpdb;
+    }
+
+    protected function tearDown(): void {
+        parent::tearDown();
+
+        // Reset global variables between tests
+        global $wpdb;
+        $wpdb = null; // Clear mock object
+
+        $_POST = [];   // Reset POST data
+        $_SERVER = []; // Reset server variables
     }
 
     public function test_does_not_insert_when_submitIsPosting_is_false() {

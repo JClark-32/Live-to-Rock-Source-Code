@@ -11,6 +11,10 @@
          displayDetailsOnPhpunitDeprecations="false"
          failOnRisky="false"
          failOnWarning="false">
+    <php>
+        <const name="ABSPATH" value="C:/Live To Rock/Live-to-Rock-Source-Code/" />
+        <const name="PHPUNIT_RUNNING" value="true" />
+    </php>
     <testsuites>
         <testsuite name="default">
             <directory suffix="Test.php">tests/Unit</directory>

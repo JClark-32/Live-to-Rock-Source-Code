@@ -1,21 +1,35 @@
 <?php
 use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../../../vendor/autoload.php';
-require_once __DIR__ . '/../../../src/plugins/LifePerformancesPlugin/CheckSQLError.php';
+require_once __DIR__ . '/../../../src/plugins/LifePerformancesPlugin/includes/CheckSQLError.php';
 
 class CheckSQLErrorTest extends TestCase {
     private $logFile;
 
     protected function setUp(): void {
+        global $wpdb;
+
         // temporary file for error_log output
         $this->logFile = tempnam(sys_get_temp_dir(), 'log');
         ini_set('error_log', $this->logFile);
+
+        $wpdb = new stdClass();
+        $wpdb->last_error = '';
     }
 
     protected function tearDown(): void {
+        parent::tearDown();
+
         // clean up and restore log file
         ini_restore('error_log');
         unlink($this->logFile);
+
+        // Reset global variables between tests
+        global $wpdb;
+        $wpdb = null; // Clear mock object
+
+        $_POST = [];   // Reset POST data
+        $_SERVER = []; // Reset server variables
     }
 
     // no SQL errors

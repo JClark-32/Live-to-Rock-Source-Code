@@ -1,6 +1,7 @@
 <?php
     function get_video_id(){
         global $wpdb;
+        
         $urlIsPosting = isset($_POST['ltr-video-url']);
         $isRequesting = $_SERVER['REQUEST_METHOD'] === 'POST';
         
@@ -45,7 +46,10 @@
             }
         
             wp_redirect($_SERVER['REQUEST_URI']);
-            exit;
+            // for test functionality
+            if (!defined('PHPUNIT_RUNNING')) {
+                exit;
+            }
         }
     }
 ?>
