@@ -28,5 +28,18 @@ class CheckIfUserLikedTest extends TestCase {
         $wpdb = null; // reset
     }
 
-    
+    public function testCheckIfUserLikedReturnsExpectedResult() {
+        global $wpdb;
+        $blog_id = 123;
+        $expectedQuery = "SELECT user_liked FROM wp_blog_post_likes WHERE user_liked='testuser' AND blog_id='$blog_id'";
+
+        $this->wpdb->expects($this->once())
+            ->method('query')
+            ->with($this->equalTo($expectedQuery))
+            ->willReturn(5);
+
+        $result = check_if_user_liked($blog_id);
+
+        $this->assertEquals(5, $result);
+    }
 }
