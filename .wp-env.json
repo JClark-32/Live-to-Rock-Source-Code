@@ -1,0 +1,8 @@
+{
+    "core": "WordPress/WordPress",
+    "plugins": [
+      "./src/plugins/JamSessionPlugin",
+      "./src/plugins/LifePerformancesPlugin"
+    ]
+  }
+  
