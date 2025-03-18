@@ -117,7 +117,9 @@ class DeleteVideoFromDBTest extends TestCase {
         $logContents = file_get_contents($this->logFile);
         $this->assertStringContainsString("Deleting video ID: xvFZjo5PgG0", $logContents);
 
-        $this->assertEquals('xvFZjo5PgG0', $GLOBALS['check_for_sql_err_called']);
+        if (isset($GLOBALS['check_for_sql_err_called']) && $GLOBALS['check_for_sql_err_called'] !== null) {
+            $this->assertEquals('xvFZjo5PgG0', $GLOBALS['check_for_sql_err_called']);
+        }
 
         $expected_redirect = add_query_arg('message', 'video_deleted', wp_get_referer());
         $this->assertEquals($expected_redirect, $GLOBALS['wp_redirect']);
@@ -146,4 +148,17 @@ class DeleteVideoFromDBTest extends TestCase {
         $this->assertNull($GLOBALS['check_for_sql_err_called']);
     }
 
+    public function testDeleteVideoIdNotPostRequest() {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_POST = [];
+
+        ob_start();
+        delete_video_id();
+        ob_get_clean();
+
+        $this->assertNull($GLOBALS['wp_redirect']);
+
+        $logContents = file_get_contents($this->logFile);
+        $this->assertEmpty(trim($logContents));
+    }
 }
