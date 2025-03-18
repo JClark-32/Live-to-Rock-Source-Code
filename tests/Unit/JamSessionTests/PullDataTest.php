@@ -26,4 +26,20 @@ class PullDataTest extends TestCase {
         global $wpdb;
         $wpdb = null;
     }
+
+    public function testPullDataReturnsExpectedResults() {
+        $expected = ['value1', 'value2'];
+        $this->wpdb->expects($this->once())
+            ->method('get_col')
+            ->with($this->callback(function($sql) {
+                // normalize to lowercase and no whitespace
+                $normalized = strtolower(trim(preg_replace('/\s+/', ' ', $sql)));
+                return $normalized === 'select column_name from wp_blog_post';
+            }))
+            ->willReturn($expected);
+
+        $result = pull_data('column_name');
+
+        $this->assertEquals($expected, $result);
+    }
 }
