@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+require_once __DIR__ . '/../../../vendor/autoload.php';
 
 if (!function_exists('wp_get_current_user')) {
     function wp_get_current_user() {
