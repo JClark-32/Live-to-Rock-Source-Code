@@ -80,9 +80,8 @@
                 likeColor();
                 //actionDiv.appendChild(likeCount);
                 actionDiv.appendChild(commentButton);
+                deleteButtonAppear();
             }
-
-            deleteButtonAppear();
 
             postDiv.appendChild(actionDiv);
             blogContainer.appendChild(postDiv);    

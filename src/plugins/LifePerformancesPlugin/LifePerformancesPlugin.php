@@ -53,7 +53,7 @@ class LifePerformances {
     public function load_assets() {
         wp_enqueue_style(
             'LifePerformancesPlugin',
-            plugin_dir_url( __FILE__ ) . '/css/LifePerformancesPlugin.css',
+            //plugin_dir_url( __FILE__ ) . '/css/LifePerformancesPlugin.css',
             array(),
             1,
             'all'
