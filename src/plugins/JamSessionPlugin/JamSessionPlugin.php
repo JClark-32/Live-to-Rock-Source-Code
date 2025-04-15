@@ -154,6 +154,11 @@
         echo '</div>';
         return ob_get_clean();
     }
+
+    // blog index
+    public function show_blog_index() {
+
+    }
     
     public function add_delete_button_ajax(){
         if (current_user_can('edit_others_posts')){
