@@ -157,7 +157,30 @@
 
     // blog index
     public function show_blog_index() {
-
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'blog_post';
+        
+            $results = $wpdb->get_results("SELECT id, blog_title, blog_author, date_posted FROM $table_name ORDER BY date_posted DESC");
+        
+            ob_start();
+            echo '<div class="ltr-blog-index">';
+            echo '<h2>Blog Post Index</h2>';
+            echo '<div style="width:100%;height:200px;overflow:auto;">';
+            echo '<ul>';
+        
+            foreach ($results as $row) {
+                echo '<li>';
+                echo '' . esc_html($row->blog_title) . ' | ';
+                echo '' . esc_html($row->date_posted) . '<br>';
+                echo '</li><hr>';
+            }
+        
+            echo '</ul>';
+            echo '</div>';
+            echo '</div>';
+        
+            return ob_get_clean();
+        
     }
     
     public function add_delete_button_ajax(){
