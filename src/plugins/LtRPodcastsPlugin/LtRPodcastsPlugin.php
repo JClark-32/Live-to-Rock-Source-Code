@@ -13,7 +13,8 @@ if ( !defined('ABSPATH') ) { exit; }
 Class LtRPodcasts{
     public function __construct(){
         add_action( 'admin_menu', array($this, 'wporg_options_page'));
-        add_action('init', array( $this,'createAdminMenu') );
+        //add_action('init', array( $this,'createAdminMenu') );
+        add_shortcode('ltr-podcasts', array ( $this, 'podcast_shortcode') );
     }
 
     
@@ -23,6 +24,7 @@ Class LtRPodcasts{
           <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
           <form action="options.php" method="post">
             <textarea>Enter Playlist Url</textarea>
+            <button style="submit">Change</button>
           </form>
         </div>
         <?php
@@ -40,7 +42,12 @@ Class LtRPodcasts{
         );
     }
 
-    public function createAdminMenu(){
-    } 
+    public function podcast_shortcode() {
+        ob_start();
+        ?>
+        <?php
+        return ob_get_clean();
+    }
+
 }
 new LtRPodcasts();
