@@ -15,8 +15,11 @@
     public function __construct(){
         require_once 'includes/JSDatabaseCalls.php';
         require_once 'includes/JSDatabaseTableCreation.php';
+
         add_shortcode('ltr-blog-submission', array( $this,'empty_shortcode') );
         add_shortcode('ltr-blogs', array( $this,'show_blogs') );
+        add_shortcode('ltr-blog-index', array($this, 'show_blog_index'));
+
         add_action('plugins_loaded', array( $this,'wporg_add_submit_post_ability') );
         add_action('init', array( $this,'blog_id') );
         //add_action('init', array( $this,'enqueue_database_calls'));
