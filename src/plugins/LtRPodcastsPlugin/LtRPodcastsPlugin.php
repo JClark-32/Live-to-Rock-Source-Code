@@ -11,5 +11,36 @@
 if ( !defined('ABSPATH') ) { exit; }
 
 Class LtRPodcasts{
+    public function __construct(){
+        add_action( 'admin_menu', array($this, 'wporg_options_page'));
+        add_action('init', array( $this,'createAdminMenu') );
+    }
 
+    
+    function wporg_options_page_html() {
+        ?>
+        <div class="wrap">
+          <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+          <form action="options.php" method="post">
+            <textarea>Enter Playlist Url</textarea>
+          </form>
+        </div>
+        <?php
+    }
+    
+    function wporg_options_page() {
+        add_menu_page(
+            'LtR Podcasts',
+            'LtR Podcasts',
+            'manage_options',
+            'ltr_podcasts',
+            array($this, 'wporg_options_page_html'),
+            'dashicons-microphone',
+            null
+        );
+    }
+
+    public function createAdminMenu(){
+    } 
 }
+new LtRPodcasts();
