@@ -15,8 +15,11 @@
     public function __construct(){
         require_once 'includes/JSDatabaseCalls.php';
         require_once 'includes/JSDatabaseTableCreation.php';
+
         add_shortcode('ltr-blog-submission', array( $this,'empty_shortcode') );
         add_shortcode('ltr-blogs', array( $this,'show_blogs') );
+        add_shortcode('ltr-blog-index', array($this, 'show_blog_index'));
+
         add_action('plugins_loaded', array( $this,'wporg_add_submit_post_ability') );
         add_action('init', array( $this,'blog_id') );
         //add_action('init', array( $this,'enqueue_database_calls'));
@@ -150,6 +153,38 @@
 
         echo '</div>';
         return ob_get_clean();
+    }
+
+    // blog index
+    public function show_blog_index() {
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'blog_post';
+        
+            $results = $wpdb->get_results("SELECT id, blog_title, date_posted FROM $table_name ORDER BY date_posted DESC");
+        
+            ob_start();
+            echo '<div class="ltr-blog-index" style="margin:5px;">';
+            echo '<h2>Table of Contents</h2>';
+            echo '<div style="width:100%;height:200px;overflow:auto;">';
+            echo '<ul style=" list-style-type: square;margin: 10px 0;">';
+        
+            foreach ($results as $row) {
+                // Format the date from YYYY-MM-DD HH:MM:SS to DD Month YYYY
+                $formatted_date = date("d F Y", strtotime($row->date_posted));
+
+                echo '<li>';
+                echo '<a href="#blog-post' . esc_html($row->id) .'">';
+                echo esc_html($row->blog_title) . '</a> | ';
+                echo esc_html($formatted_date) . '<br>';
+                echo '</li>';
+            }
+        
+            echo '</ul>';
+            echo '</div>';
+            echo '</div>';
+        
+            return ob_get_clean();
+        
     }
     
     public function add_delete_button_ajax(){
