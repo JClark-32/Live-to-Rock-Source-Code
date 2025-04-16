@@ -169,10 +169,13 @@
             echo '<ul style=" list-style-type: square;margin: 10px 0;">';
         
             foreach ($results as $row) {
+                // Format the date from YYYY-MM-DD HH:MM:SS to DD Month YYYY
+                $formatted_date = date("d F Y", strtotime($row->date_posted));
+
                 echo '<li>';
                 echo '<a href="#blog-post' . esc_html($row->id) .'">';
-                echo '' . esc_html($row->blog_title) . '</a> | ';
-                echo '' . esc_html($row->date_posted) . '<br>';
+                echo esc_html($row->blog_title) . '</a> | ';
+                echo esc_html($formatted_date) . '<br>';
                 echo '</li>';
             }
         
