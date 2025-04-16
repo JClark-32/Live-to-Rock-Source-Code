@@ -160,7 +160,7 @@
             global $wpdb;
             $table_name = $wpdb->prefix . 'blog_post';
         
-            $results = $wpdb->get_results("SELECT id, blog_title, blog_author, date_posted FROM $table_name ORDER BY date_posted DESC");
+            $results = $wpdb->get_results("SELECT id, blog_title, date_posted FROM $table_name ORDER BY date_posted DESC");
         
             ob_start();
             echo '<div class="ltr-blog-index">';
@@ -169,7 +169,7 @@
             echo '<ul>';
         
             foreach ($results as $row) {
-                echo '<li>';
+                echo '<li href="#blog-post-' . esc_html($row->id) .'">';
                 echo '' . esc_html($row->blog_title) . ' | ';
                 echo '' . esc_html($row->date_posted) . '<br>';
                 echo '</li><hr>';
