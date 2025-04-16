@@ -169,8 +169,9 @@
             echo '<ul>';
         
             foreach ($results as $row) {
-                echo '<li href="#blog-post' . esc_html($row->id) .'">';
-                echo '' . esc_html($row->blog_title) . ' | ';
+                echo '<li>';
+                echo '<a href="#blog-post' . esc_html($row->id) .'">';
+                echo '' . esc_html($row->blog_title) . '</a> | ';
                 echo '' . esc_html($row->date_posted) . '<br>';
                 echo '</li><hr>';
             }
