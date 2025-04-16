@@ -15,6 +15,7 @@ Class LtRPodcasts{
         add_action( 'admin_menu', array($this, 'wporg_options_page'));
         add_action('init', array( $this,'podcast_id') );
         add_action('admin_post_save_ltr_playlist', array($this, 'save_playlist_url'));
+        //add_action('init', array($this, 'get_youtube_playlist_videos'));
         add_shortcode('ltr-podcasts', array ( $this, 'podcast_shortcode') );
     }
 
@@ -66,14 +67,61 @@ Class LtRPodcasts{
 
     public function podcast_shortcode() {
         $playlist = get_option('ltr_playlist_url', '');
+        $api_key = 'AIzaSyA7ySihnnPwlkJh9H4azwqTpJsMM8Gs5AM';
+        $videos = $this->get_youtube_playlist_videos($playlist, $api_key);
         ob_start();
-        ?>
-        <p>
-            <?php echo esc_html($playlist); ?>
-        </p>
-        <?php
+        foreach ( $videos as $video ) {
+            $title = esc_html( $video['snippet']['title'] );
+            $video_id = $video['snippet']['resourceId']['videoId'];
+            //$thumbnail = esc_url( $video['snippet']['thumbnails']['medium']['url'] );
+    
+            echo "<div style='margin-bottom:20px;'>";
+            echo "<h4>$title</h4>";
+            echo "<iframe loading='lazy' referrerpolicy='strict-origin-when-cross-origin' width='560' height='315' 
+            src='https://www.youtube-nocookie.com/embed/$video_id' 
+            frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen>
+            </iframe>";
+            echo "</div>";
+        }
         return ob_get_clean();
     }
+
+    function get_youtube_playlist_videos( $playlist_url, $api_key ) {
+        $url_parts = wp_parse_url( $playlist_url );
+        if ( empty( $url_parts['query'] ) ) {
+            return new WP_Error( 'invalid_url', 'Invalid YouTube playlist URL.' );
+        }
+    
+        parse_str( $url_parts['query'], $query_params );
+        if ( empty( $query_params['list'] ) ) {
+            return new WP_Error( 'missing_playlist_id', 'No playlist ID found in URL.' );
+        }
+    
+        $playlist_id = sanitize_text_field( $query_params['list'] );
+    
+        $api_url = add_query_arg( array(
+            'part'       => 'snippet',
+            'playlistId' => $playlist_id,
+            'maxResults' => 20,
+            'key'        => $api_key,
+        ), 'https://www.googleapis.com/youtube/v3/playlistItems' );
+    
+        $response = wp_remote_get( $api_url );
+    
+        if ( is_wp_error( $response ) ) {
+            return $response;
+        }
+    
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode( $body, true );
+    
+        if ( isset( $data['items'] ) ) {
+            return $data['items'];
+        } else {
+            return new WP_Error( 'api_error', 'Could not fetch playlist items.' );
+        }
+    }
+    
 
 }
 new LtRPodcasts();
