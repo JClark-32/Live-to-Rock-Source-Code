@@ -164,7 +164,7 @@
         
             ob_start();
             echo '<div class="ltr-blog-index" style="margin:5px;">';
-            echo '<h2>Blog Post Index</h2>';
+            echo '<h2>Table of Contents</h2>';
             echo '<div style="width:100%;height:200px;overflow:auto;">';
             echo '<ul style=" list-style-type: square;margin: 10px 0;">';
         
