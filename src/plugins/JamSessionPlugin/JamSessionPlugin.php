@@ -163,17 +163,17 @@
             $results = $wpdb->get_results("SELECT id, blog_title, date_posted FROM $table_name ORDER BY date_posted DESC");
         
             ob_start();
-            echo '<div class="ltr-blog-index">';
+            echo '<div class="ltr-blog-index" style="margin:5px;">';
             echo '<h2>Blog Post Index</h2>';
             echo '<div style="width:100%;height:200px;overflow:auto;">';
-            echo '<ul>';
+            echo '<ul style=" list-style-type: square;margin: 10px 0;">';
         
             foreach ($results as $row) {
                 echo '<li>';
                 echo '<a href="#blog-post' . esc_html($row->id) .'">';
                 echo '' . esc_html($row->blog_title) . '</a> | ';
                 echo '' . esc_html($row->date_posted) . '<br>';
-                echo '</li><hr>';
+                echo '</li>';
             }
         
             echo '</ul>';
