@@ -3,11 +3,8 @@
 use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../../../vendor/autoload.php';
 
-if (!function_exists('wp_get_current_user')) {
-    function wp_get_current_user() {
-        return (object)['user_login' => 'testuser'];
-    }
-}
+// WORDPRESS MOCKS
+require_once __DIR__ . '/Bootstrap.php';
 
 require_once __DIR__ . '/../../../src/plugins/JamSessionPlugin/includes/JSDatabaseCalls.php';
 
