@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.4/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          cacheDirectory=".phpunit.cache"
          executionOrder="depends,defects"
@@ -11,19 +11,30 @@
          displayDetailsOnPhpunitDeprecations="false"
          failOnRisky="false"
          failOnWarning="false">
+
     <php>
         <const name="ABSPATH" value="C:/Live To Rock/Live-to-Rock-Source-Code/" />
         <const name="PHPUNIT_RUNNING" value="true" />
     </php>
+
     <testsuites>
         <testsuite name="default">
             <directory suffix="Test.php">tests/Unit</directory>
         </testsuite>
     </testsuites>
-    <coverage>
+
+    <coverage includeUncoveredFiles="false">
+        <report>
+            <html outputDirectory="coverage/" />
+        </report>
+    </coverage>
+
+    <source ignoreIndirectDeprecations="true"
+            restrictNotices="true"
+            restrictWarnings="true">
         <include>
-            <directory>src/plugins/LifePerformancesPlugin</directory>
-            <directory>src/plugins/JamSessionPlugin</directory>
+            <directory suffix=".php">src/plugins/LifePerformancesPlugin</directory>
+            <directory suffix=".php">src/plugins/JamSessionPlugin</directory>
         </include>
         <exclude>
             <directory>src/plugins/LifePerformancesPlugin/tests</directory>
@@ -32,10 +43,5 @@
             <directory>src/plugins/LifePerformancesPlugin/.vscode</directory>
             <directory>src/plugins/LifePerformancesPlugin/coverage</directory>
         </exclude>
-    </coverage>
-    <source ignoreIndirectDeprecations="true" restrictNotices="true" restrictWarnings="true">
-        <include>
-            <directory>src</directory>
-        </include>
     </source>
 </phpunit>
