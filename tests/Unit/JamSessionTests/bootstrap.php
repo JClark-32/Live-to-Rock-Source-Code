@@ -41,3 +41,28 @@ if (!function_exists('wp_get_current_user')) {
         return (object)['user_login' => 'testuser'];
     }
 }
+
+
+if (!function_exists('check_if_user_liked')) {
+    function check_if_user_liked($blog_id) {
+        return 0;
+    }
+}
+
+if (!function_exists('insert_into_like_table')) {
+    function insert_into_like_table($username, $blog_id) {
+        $GLOBALS['inserted'] = [$username, $blog_id];
+    }
+}
+
+if (!function_exists('delete_from_like_table')) {
+    function delete_from_like_table($username, $blog_id) {
+        $GLOBALS['deleted'] = [$username, $blog_id];
+    }
+}
+
+if (!function_exists('wp_die')) {
+    function wp_die() {
+        // 
+    }
+}
