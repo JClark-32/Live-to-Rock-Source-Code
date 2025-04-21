@@ -1,4 +1,9 @@
 <?php
+
+if (! defined('PHPUNIT_RUNNING')) {
+    define('PHPUNIT_RUNNING', true);
+}
+
 if (!function_exists('add_shortcode')) {
     $GLOBALS['mocked_shortcodes'] = [];
     function add_shortcode($tag, $callback) {
