@@ -47,27 +47,18 @@ if (!function_exists('wp_get_current_user')) {
     }
 }
 
-// Stub admin_url()
-if (! function_exists('admin_url')) {
-    function admin_url($path = '') {
-        return 'http://example.test/wp-admin/' . ltrim($path, '/');
-    }
-}
-
 if (! defined('ABSPATH')) {
     define('ABSPATH', __DIR__ . '/');
 }
 
-// Stub admin_url()
 if (! function_exists('admin_url')) {
     function admin_url($path = '') {
         return 'http://example.test/wp-admin/' . ltrim($path, '/');
     }
 }
 
-if (! function_exists('add_action')) {
-    function add_action($hook, $callback) {}
-}
-if (! function_exists('add_shortcode')) {
-    function add_shortcode($tag, $callback) {}
+if (! function_exists('wp_editor')) {
+    function wp_editor($content, $editor_id, $settings) {
+        echo "<textarea id=\"{$editor_id}\">{$content}</textarea>";
+    }
 }
