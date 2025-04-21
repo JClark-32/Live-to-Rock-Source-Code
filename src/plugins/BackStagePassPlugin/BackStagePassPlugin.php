@@ -60,7 +60,7 @@ Class BackStagePass{
         $videos_per_page = 15;
     
         $playlist = get_option('ltr_playlist_url', '');
-        $api_key = 'AIzaSyA7ySihnnPwlkJh9H4azwqTpJsMM8Gs5AM';
+        $api_key = 'AIzaSyBbRckmA_1G9mx-837WdCFM8OxXzg0sKVg';
         $videos = $this->get_youtube_playlist_videos($playlist, $api_key);
     
         if (is_wp_error($videos)) {
