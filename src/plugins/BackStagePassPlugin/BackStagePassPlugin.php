@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: LtR Podcasts Plugin
+ * Plugin Name: BackStagePass Plugin
  * Description: Adds podcast playlist integration
  * Authors: Live to Rock Capstone Team
  * Version: 0.1.0
@@ -10,7 +10,7 @@
 // Prevent public user access to .php file
 if ( !defined('ABSPATH') ) { exit; }
 
-Class LtRPodcasts{
+Class BackStagePass{
     public function __construct(){
         add_action( 'admin_menu', array($this, 'wporg_options_page'));
         add_action('init', array( $this,'podcast_id') );
@@ -55,10 +55,10 @@ Class LtRPodcasts{
     
     function wporg_options_page() {
         add_menu_page(
-            'LtR Podcasts',
-            'LtR Podcasts',
+            'Back Stage Pass',
+            'Back Stage Pass',
             'manage_options',
-            'ltr_podcasts',
+            'back_stage_pass',
             array($this, 'wporg_options_page_html'),
             'dashicons-microphone',
             null
@@ -124,4 +124,4 @@ Class LtRPodcasts{
     
 
 }
-new LtRPodcasts();
+new BackStagePass();
