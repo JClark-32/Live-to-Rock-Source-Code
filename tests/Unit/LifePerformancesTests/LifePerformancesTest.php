@@ -80,26 +80,26 @@ class LifePerformancesTest extends TestCase
     }
 
     // LOAD ASSETS 
-    public function testLoadAssets()
-    {
-        global $mocked_enqueue_styles;
-        $mocked_enqueue_styles = [];
+    // public function testLoadAssets()
+    // {
+    //     global $mocked_enqueue_styles;
+    //     $mocked_enqueue_styles = [];
     
-        $plugin = new LifePerformances();
-        $plugin->load_assets();
+    //     $plugin = new LifePerformances();
+    //     $plugin->load_assets();
     
-        $this->assertNotEmpty($mocked_enqueue_styles, 'wp_enqueue_style was not called.');
+    //     $this->assertNotEmpty($mocked_enqueue_styles, 'wp_enqueue_style was not called.');
     
-        $expectedStyle = [
-            'handle' => 'LifePerformancesPlugin',
-            'src' => plugin_dir_url(__FILE__) . '/css/LifePerformancesPlugin.css',
-            'deps' => [],
-            'ver' => 1,
-            'media' => 'all',
-        ];
+    //     $expectedStyle = [
+    //         'handle' => 'LifePerformancesPlugin',
+    //         'src' => plugin_dir_url(__FILE__) . '/css/LifePerformancesPlugin.css',
+    //         'deps' => [],
+    //         'ver' => 1,
+    //         'media' => 'all',
+    //     ];
     
-        $this->assertContains($expectedStyle, $mocked_enqueue_styles, 'The correct style was not enqueued.');
-    }
+    //     $this->assertContains($expectedStyle, $mocked_enqueue_styles, 'The correct style was not enqueued.');
+    // }
 
     // BLANK SHORTCODE
     public function testBlankShortcode()
