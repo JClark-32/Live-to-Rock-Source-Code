@@ -39,14 +39,12 @@ Class BackStagePass{
             update_option('ltr_playlist_url', $playlist);
         }
     
-        // Redirect back to the settings page
-        wp_redirect(admin_url('admin.php?page=ltr_podcasts&updated=true'));
+        wp_redirect(admin_url('admin.php?page=back_stage_pass&updated=true'));
         exit;
     }
     
     public function podcast_id() {
         if (isset($_POST['ltr-playlist-url'])) {
-            // Sanitize and save the value
             $playlist = sanitize_text_field($_POST['ltr-playlist-url']);
             update_option('ltr_playlist_url', $playlist);
         }
@@ -66,61 +64,104 @@ Class BackStagePass{
     }
 
     public function podcast_shortcode() {
+        $current_page = isset($_GET['podcast_page']) ? max(1, intval($_GET['podcast_page'])) : 1;
+        $videos_per_page = 10;
+    
         $playlist = get_option('ltr_playlist_url', '');
         $api_key = 'AIzaSyA7ySihnnPwlkJh9H4azwqTpJsMM8Gs5AM';
         $videos = $this->get_youtube_playlist_videos($playlist, $api_key);
+    
+        if (is_wp_error($videos)) {
+            return '<p>Error fetching playlist: ' . esc_html($videos->get_error_message()) . '</p>';
+        }
+    
+        $total_videos = count($videos);
+        $total_pages = ceil($total_videos / $videos_per_page);
+        $offset = ($current_page - 1) * $videos_per_page;
+        $paged_videos = array_slice($videos, $offset, $videos_per_page);
+    
         ob_start();
-        foreach ( $videos as $video ) {
-            $title = esc_html( $video['snippet']['title'] );
-            $video_id = $video['snippet']['resourceId']['videoId'];
-            //$thumbnail = esc_url( $video['snippet']['thumbnails']['medium']['url'] );
+        
+        echo '<div align="center">';
+
+        foreach ($paged_videos as $video) {
+            $title = esc_html($video['snippet']['title']);
+            $video_id = esc_attr($video['snippet']['resourceId']['videoId']);
     
             echo "<div style='margin-bottom:20px;'>";
             echo "<h4>$title</h4>";
-            echo "<iframe loading='lazy' referrerpolicy='strict-origin-when-cross-origin' width='560' height='315' 
-            src='https://www.youtube-nocookie.com/embed/$video_id' 
-            frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen>
-            </iframe>";
+            echo "<iframe loading='lazy' referrerpolicy='strict-origin-when-cross-origin' width='560' height='315' src='https://www.youtube-nocookie.com/embed/$video_id' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe>";
             echo "</div>";
         }
+
+        echo '</div>';
+    
+        echo '<div class="podcast-pagination" style="margin-top: 20px; text-align:center;">';
+    
+        $base_url = remove_query_arg('podcast_page');
+        $connector = strpos($base_url, '?') !== false ? '&' : '?';
+    
+        if ($current_page > 1) {
+            $prev_page = $current_page - 1;
+            echo '<a href="' . esc_url($base_url . $connector . 'podcast_page=' . $prev_page) . '">← Previous</a> ';
+        }
+    
+        for ($i = 1; $i <= $total_pages; $i++) {
+            if ($i === $current_page) {
+                echo '<strong style="margin: 0 5px;">' . $i . '</strong>';
+            } else {
+                echo '<a href="' . esc_url($base_url . $connector . 'podcast_page=' . $i) . '" style="margin: 0 5px;">' . $i . '</a>';
+            }
+        }
+    
+        if ($current_page < $total_pages) {
+            $next_page = $current_page + 1;
+            echo ' <a href="' . esc_url($base_url . $connector . 'podcast_page=' . $next_page) . '">Next →</a>';
+        }
+    
+        echo '</div>';
+    
         return ob_get_clean();
     }
+    
+    
 
-    function get_youtube_playlist_videos( $playlist_url, $api_key ) {
-        $url_parts = wp_parse_url( $playlist_url );
-        if ( empty( $url_parts['query'] ) ) {
-            return new WP_Error( 'invalid_url', 'Invalid YouTube playlist URL.' );
+    public function get_youtube_playlist_videos($playlist_id, $api_key) {
+        $videos = [];
+        $page_token = '';
+        $base_url = 'https://www.googleapis.com/youtube/v3/playlistItems';
+    
+        if (strpos($playlist_id, 'list=') !== false) {
+            parse_str(parse_url($playlist_id, PHP_URL_QUERY), $query_vars);
+            $playlist_id = $query_vars['list'] ?? $playlist_id;
         }
     
-        parse_str( $url_parts['query'], $query_params );
-        if ( empty( $query_params['list'] ) ) {
-            return new WP_Error( 'missing_playlist_id', 'No playlist ID found in URL.' );
-        }
+        do {
+            $response = wp_remote_get($base_url . '?' . http_build_query([
+                'part'       => 'snippet',
+                'playlistId' => $playlist_id,
+                'maxResults' => 50,
+                'pageToken'  => $page_token,
+                'key'        => $api_key,
+            ]));
     
-        $playlist_id = sanitize_text_field( $query_params['list'] );
+            if (is_wp_error($response)) {
+                return $response;
+            }
     
-        $api_url = add_query_arg( array(
-            'part'       => 'snippet',
-            'playlistId' => $playlist_id,
-            'maxResults' => 20,
-            'key'        => $api_key,
-        ), 'https://www.googleapis.com/youtube/v3/playlistItems' );
+            $body = json_decode(wp_remote_retrieve_body($response), true);
     
-        $response = wp_remote_get( $api_url );
+            if (!empty($body['items'])) {
+                $videos = array_merge($videos, $body['items']);
+            }
     
-        if ( is_wp_error( $response ) ) {
-            return $response;
-        }
+            $page_token = $body['nextPageToken'] ?? null;
     
-        $body = wp_remote_retrieve_body( $response );
-        $data = json_decode( $body, true );
+        } while ($page_token);
     
-        if ( isset( $data['items'] ) ) {
-            return $data['items'];
-        } else {
-            return new WP_Error( 'api_error', 'Could not fetch playlist items.' );
-        }
+        return $videos;
     }
+    
     
 
 }
