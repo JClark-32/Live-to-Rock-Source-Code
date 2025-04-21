@@ -204,7 +204,10 @@
         }
 
         delete_blog_post($blog_id);
-        die();
+        
+        if (!defined('PHPUNIT_RUNNING')) {
+            die();
+        }
     }
     
 
@@ -221,7 +224,9 @@
         insert_into_comment_table($comment, $blog_id);
         echo $username;
 
-        die();
+        if (!defined('PHPUNIT_RUNNING')) {
+            die();
+        }
     }
     
 
@@ -231,7 +236,10 @@
             $commentID=$_REQUEST['commentID'];
         }
         delete_blog_comment($postID, $commentID);
-        die();
+
+        if (!defined('PHPUNIT_RUNNING')) {
+            die();
+        }
     }
 
     public function comments_clicked_ajax_request(){
@@ -241,7 +249,9 @@
             echo json_encode($comments);
         }
 
-        die();
+        if (!defined('PHPUNIT_RUNNING')) {
+            die();
+        }
     }
 
     public function like_ajax_request(){
@@ -263,7 +273,10 @@
             echo "unliked";
             delete_from_like_table($username, $blog_id);
         }
-        die();
+        
+        if (!defined('PHPUNIT_RUNNING')) {
+            die();
+        }
     }
 
     public function like_count_ajax_request(){
@@ -285,8 +298,14 @@
         else{
             echo "liked";
         }
-        die();
+        
+        if (!defined('PHPUNIT_RUNNING')) {
+            die();
+        }
     }
 
 }
-new JamSession();
+
+if ( ! defined('PHPUNIT_RUNNING') ) {
+    new JamSession();
+}

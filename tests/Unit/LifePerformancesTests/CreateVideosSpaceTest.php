@@ -3,17 +3,19 @@
 use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../../../vendor/autoload.php';
 
+require_once __DIR__ . '/../global_bootstrap.php'; // for current user can
+
 if (!function_exists('wp_nonce_field')) {
     function wp_nonce_field($action, $name) {
         echo "<input type='hidden' name='{$name}' value='nonce_value' />";
     }
 }
 
-if (!function_exists('current_user_can')) {
-    function current_user_can($capability) {
-        return isset($GLOBALS['current_user_can']) ? $GLOBALS['current_user_can'] : false;
-    }
-}
+// if (!function_exists('current_user_can')) {
+//     function current_user_can($capability) {
+//         return isset($GLOBALS['current_user_can']) ? $GLOBALS['current_user_can'] : false;
+//     }
+// }
 
 require_once __DIR__ . '/../../../src/plugins/LifePerformancesPlugin/includes/CreateVideosSpace.php';
 
@@ -22,14 +24,13 @@ Class CreateVideosSpaceTest extends TestCase {
 
     protected function setUp(): void {
         parent::setUp();
-
         $this->initialObLevel = ob_get_level();
 
         while (ob_get_level() > $this->initialObLevel) { // clear any buffers left over from other tests
             ob_end_clean();
         }
 
-        unset($GLOBALS['current_user_can']); // reset globals
+        unset($GLOBALS['test_can_edit']);
     }
 
     protected function tearDown(): void {
@@ -52,7 +53,7 @@ Class CreateVideosSpaceTest extends TestCase {
 
 
  public function testVideoDataWithoutPrivileges() {
-        $GLOBALS['current_user_can'] = false;
+        $GLOBALS['test_can_edit'] = false;
 
         // sample video objects
         $video1 = new stdClass();
@@ -94,7 +95,7 @@ Class CreateVideosSpaceTest extends TestCase {
     }
 
     public function testVideoDataWithPrivileges() {
-        $GLOBALS['current_user_can'] = true;
+        $GLOBALS['test_can_edit'] = true;
 
         $video = new stdClass();
         $video->submission_text = 'video789';
