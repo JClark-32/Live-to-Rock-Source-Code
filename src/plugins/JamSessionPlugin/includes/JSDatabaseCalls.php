@@ -9,15 +9,17 @@
         return $return_value;
     }
 
-    function check_if_user_liked($blog_id){
-        global $wpdb;
-        $likes_table_name = $wpdb->prefix . 'blog_post_likes';
-        $current_user = wp_get_current_user();
-        $username = $current_user->user_login;
+    if (!function_exists('check_if_user_liked')) {
+        function check_if_user_liked($blog_id){
+            global $wpdb;
+            $likes_table_name = $wpdb->prefix . 'blog_post_likes';
+            $current_user = wp_get_current_user();
+            $username = $current_user->user_login;
 
-        $checkQuery = "SELECT user_liked FROM $likes_table_name WHERE user_liked='$username' AND blog_id='$blog_id'";
-        $results = $wpdb->query($checkQuery);
-        return $results;
+            $checkQuery = "SELECT user_liked FROM $likes_table_name WHERE user_liked='$username' AND blog_id='$blog_id'";
+            $results = $wpdb->query($checkQuery);
+            return $results;
+        }
     }
 
     function insert_into_like_table($username, $blog_id){
