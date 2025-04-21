@@ -305,4 +305,7 @@
     }
 
 }
-new JamSession();
+
+if ( ! defined('PHPUNIT_RUNNING') ) {
+    new JamSession();
+}
