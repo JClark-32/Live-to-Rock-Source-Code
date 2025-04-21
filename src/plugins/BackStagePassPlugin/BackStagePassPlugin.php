@@ -4,7 +4,7 @@
  * Description: Adds podcast playlist integration
  * Authors: Live to Rock Capstone Team
  * Version: 0.1.0
- * Text Domain: ltr-podcast-plugin
+ * Text Domain: backstage-pass-plugin
  */
 
 // Prevent public user access to .php file
@@ -12,15 +12,14 @@ if ( !defined('ABSPATH') ) { exit; }
 
 Class BackStagePass{
     public function __construct(){
-        add_action( 'admin_menu', array($this, 'wporg_options_page'));
-        add_action('init', array( $this,'podcast_id') );
+        add_action( 'admin_menu', array($this, 'ltr_bsp_options_page'));
         add_action('admin_post_save_ltr_playlist', array($this, 'save_playlist_url'));
         //add_action('init', array($this, 'get_youtube_playlist_videos'));
         add_shortcode('ltr-podcasts', array ( $this, 'podcast_shortcode') );
     }
 
     
-    function wporg_options_page_html() {
+    function ltr_bsp_options_page_html() {
         ?>
         <div class="wrap">
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
@@ -43,21 +42,14 @@ Class BackStagePass{
         exit;
     }
     
-    public function podcast_id() {
-        if (isset($_POST['ltr-playlist-url'])) {
-            $playlist = sanitize_text_field($_POST['ltr-playlist-url']);
-            update_option('ltr_playlist_url', $playlist);
-        }
-    }
     
-    
-    function wporg_options_page() {
+    function ltr_bsp_options_page() {
         add_menu_page(
             'Back Stage Pass',
             'Back Stage Pass',
             'manage_options',
             'back_stage_pass',
-            array($this, 'wporg_options_page_html'),
+            array($this, 'ltr_bsp_options_page_html'),
             'dashicons-microphone',
             null
         );
@@ -65,7 +57,7 @@ Class BackStagePass{
 
     public function podcast_shortcode() {
         $current_page = isset($_GET['podcast_page']) ? max(1, intval($_GET['podcast_page'])) : 1;
-        $videos_per_page = 10;
+        $videos_per_page = 15;
     
         $playlist = get_option('ltr_playlist_url', '');
         $api_key = 'AIzaSyA7ySihnnPwlkJh9H4azwqTpJsMM8Gs5AM';
@@ -78,13 +70,13 @@ Class BackStagePass{
         $total_videos = count($videos);
         $total_pages = ceil($total_videos / $videos_per_page);
         $offset = ($current_page - 1) * $videos_per_page;
-        $paged_videos = array_slice($videos, $offset, $videos_per_page);
+        $current_videos = array_slice($videos, $offset, $videos_per_page);
     
         ob_start();
         
         echo '<div align="center">';
 
-        foreach ($paged_videos as $video) {
+        foreach ($current_videos as $video) {
             $title = esc_html($video['snippet']['title']);
             $video_id = esc_attr($video['snippet']['resourceId']['videoId']);
     
@@ -96,16 +88,19 @@ Class BackStagePass{
 
         echo '</div>';
     
-        echo '<div class="podcast-pagination" style="margin-top: 20px; text-align:center;">';
+        // Page menu
+        echo '<div class="podcast-page-menu" style="margin-top: 20px; text-align:center;">';
     
         $base_url = remove_query_arg('podcast_page');
         $connector = strpos($base_url, '?') !== false ? '&' : '?';
     
+        // Previous link
         if ($current_page > 1) {
             $prev_page = $current_page - 1;
             echo '<a href="' . esc_url($base_url . $connector . 'podcast_page=' . $prev_page) . '">← Previous</a> ';
         }
     
+        // Numbered page links
         for ($i = 1; $i <= $total_pages; $i++) {
             if ($i === $current_page) {
                 echo '<strong style="margin: 0 5px;">' . $i . '</strong>';
@@ -114,6 +109,7 @@ Class BackStagePass{
             }
         }
     
+        // Next link
         if ($current_page < $total_pages) {
             $next_page = $current_page + 1;
             echo ' <a href="' . esc_url($base_url . $connector . 'podcast_page=' . $next_page) . '">Next →</a>';
