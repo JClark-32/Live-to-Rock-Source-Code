@@ -88,3 +88,7 @@ if ( ! function_exists('admin_url') ) {
         return 'http://example.test/wp-admin/' . ltrim($path, '/');
     }
 }
+
+if (! function_exists('esc_attr')) {
+    function esc_attr($s) { return $s; }
+}
