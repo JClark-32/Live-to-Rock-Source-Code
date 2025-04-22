@@ -79,7 +79,9 @@ Class CreateVideosSpaceTest extends TestCase {
         $this->assertStringContainsString("name='videoInput' value='8ugK6BCZzyY'", $output);
 
         // delete button hidden?
-        $this->assertStringContainsString("<style>#video-posted0 { display: none; }</style>", $output);
+        $this->assertStringNotContainsString("<style>#video-posted0 { display: none; }</style>", $output);
+        $this->assertStringContainsString("<style>#video-posted1 { display: none; }</style>", $output);
+        
         $this->assertStringContainsString("<style>#deleteButton0 { display: none; }</style>", $output);
         $this->assertStringContainsString("<style>#deleteButton1 { display: none; }</style>", $output);
 
@@ -90,8 +92,12 @@ Class CreateVideosSpaceTest extends TestCase {
         $this->assertStringContainsString("name='approve_video_nonce'", $output);
 
         // check script for JSON
-        $json = json_encode($video_data);
-        $this->assertStringContainsString("<script> var videoIds = " . $json . "; </script>", $output);
+        $reversed = array_reverse($video_data);
+        $expectedJson = json_encode($reversed);
+        $this->assertStringContainsString(
+            "<script> var videoIds = {$expectedJson}; </script>",
+            $output
+        );
     }
 
     public function testVideoDataWithPrivileges() {

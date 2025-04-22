@@ -1,30 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-
-// if (! defined('PHPUNIT_RUNNING')) {
-//     define('PHPUNIT_RUNNING', true);
-// }
-
-// if (! defined('ABSPATH')) {
-//     define('ABSPATH', __DIR__ . '/');
-// }
-
-
-// if (! function_exists('current_user_can')) {
-//     function current_user_can($capability) {
-//         return ($GLOBALS['can_edit'] ?? false) && $capability === 'edit_others_posts';
-//     }
-// }
-
-
-// if (! function_exists('add_action')) {
-//     function add_action($hook, $callback) {}
-// }
-// if (! function_exists('add_shortcode')) {
-//     function add_shortcode($tag, $callback) {}
-// }
-
 // WORDPRESS MOCKS
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/../global_bootstrap.php'; // for current user can
