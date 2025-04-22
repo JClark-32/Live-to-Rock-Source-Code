@@ -83,6 +83,11 @@ class LifePerformances {
             remove_shortcode('ltr-video-submission');
             add_shortcode('ltr-video-submission', array( $this,'load_video_submission') );
         }
+
+        if ( current_user_can('read')) {
+            remove_shortcode('ltr-delete-video');
+            add_shortcode('ltr-video-submission', array( $this,'load_video_submission') );
+        }
     }
 
     public function video_id() {
