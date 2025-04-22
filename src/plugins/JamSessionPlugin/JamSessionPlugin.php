@@ -192,9 +192,10 @@
     
         foreach ($results as $row) {
             $formatted_date = date("d F Y", strtotime($row->date_posted));
+            $clean_title = wp_unslash($row->blog_title);
             echo '<li>';
             echo '<a href="#blog-post' . esc_html($row->id) .'">';
-            echo esc_html($row->blog_title) . '</a> | ';
+            echo esc_html($clean_title) . '</a> | ';
             echo esc_html($formatted_date) . '<br>';
             echo '</li>';
         }
