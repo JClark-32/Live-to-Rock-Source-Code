@@ -127,6 +127,14 @@
         $blog_authors = pull_data("blog_author");
         $dates_posted = pull_data("date_posted");
         $blog_likes = [];
+
+        $blog_ids = array_map('wp_unslash', $blog_ids);
+        $blog_texts = array_map('wp_unslash', $blog_texts);
+        $blog_titles = array_map('wp_unslash', $blog_titles);
+        $blog_authors = array_map('wp_unslash', $blog_authors);
+        $dates_posted = array_map('wp_unslash', $dates_posted);
+        $blog_likes = array_map('wp_unslash', $blog_likes);
+
         
         foreach ($blog_ids as $value) {
             $results = get_like_count($value);
