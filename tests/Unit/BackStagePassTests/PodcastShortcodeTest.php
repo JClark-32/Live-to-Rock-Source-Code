@@ -4,30 +4,9 @@ use PHPUnit\Framework\TestCase;
 // MOCKS
 require_once __DIR__ . '/bootstrap.php';
 
-if (! class_exists('WP_Error')) {
-    class WP_Error {
-        private string $message;
-        public function __construct($code, $message) { $this->message = $message; }
-        public function get_error_message() { return $this->message; }
-    }
-}
-
 if (! function_exists('get_option')) {
     function get_option($name, $default = null) {
         return $GLOBALS['test_option_ltr_playlist_url'] ?? $default;
-    }
-}
-
-if (! function_exists('is_wp_error')) {
-    function is_wp_error($thing) {
-        return $thing instanceof WP_Error;
-    }
-}
-
-if (! function_exists('remove_query_arg')) {
-    function remove_query_arg($key) {
-        // pretend our “current URL” is always this:
-        return 'http://example.test/current-page';
     }
 }
 

@@ -92,3 +92,25 @@ if ( ! function_exists('admin_url') ) {
 if (! function_exists('esc_attr')) {
     function esc_attr($s) { return $s; }
 }
+
+if (! class_exists('WP_Error')) {
+    class WP_Error {
+        private string $message;
+        public function __construct($code, $message) { $this->message = $message; }
+        public function get_error_message() { return $this->message; }
+    }
+}
+
+
+if (! function_exists('is_wp_error')) {
+    function is_wp_error($thing) {
+        return $thing instanceof WP_Error;
+    }
+}
+
+if (! function_exists('remove_query_arg')) {
+    function remove_query_arg($key) {
+        // pretend our “current URL” is always this:
+        return 'http://example.test/current-page';
+    }
+}
