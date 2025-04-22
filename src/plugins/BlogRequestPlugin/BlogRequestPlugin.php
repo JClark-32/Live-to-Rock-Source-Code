@@ -30,7 +30,7 @@ class BlogRequestPlugin {
     }
 
     public function wporg_add_blog_request_submission_ability(){
-        if (current_user_can('edit_others_posts')) {
+        if (current_user_can('read')) {
             remove_shortcode('ltr-blog-request-submission');
             add_shortcode('ltr-blog-request-submission', array($this, 'load_blog_request_submission'));
         }
