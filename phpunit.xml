@@ -35,6 +35,7 @@
         <include>
             <directory suffix=".php">src/plugins/LifePerformancesPlugin</directory>
             <directory suffix=".php">src/plugins/JamSessionPlugin</directory>
+            <directory suffix=".php">src/plugins/BackStagePassPlugin</directory>
         </include>
         <exclude>
             <directory>src/plugins/LifePerformancesPlugin/tests</directory>

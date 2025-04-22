@@ -62,3 +62,27 @@ if (! function_exists('wp_editor')) {
         echo "<textarea id=\"{$editor_id}\">{$content}</textarea>";
     }
 }
+
+if ( ! function_exists('wp_unslash') ) {
+    function wp_unslash( $value ) {
+        return $value;
+    }
+}
+
+if ( ! function_exists('wp_unslash') ) {
+    function wp_unslash( $value ) {
+        return $value;
+    }
+}
+
+if ( ! function_exists('remove_query_arg') ) {
+    function remove_query_arg( $key, $url = '' ) {
+        return $url;
+    }
+}
+
+if ( ! function_exists('esc_url') ) {
+    function esc_url( $url ) {
+        return $url;
+    }
+}
