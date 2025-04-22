@@ -6,6 +6,9 @@
             echo '<p>No videos available</p>';
         }
 
+        // Reverse Chronological order
+        $video_data = array_reverse($video_data);
+
         foreach ($video_data as $index => $video) {
             $video_id = $video->submission_text;
             $approved = $video->approved;
