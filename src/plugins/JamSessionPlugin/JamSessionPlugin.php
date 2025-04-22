@@ -127,6 +127,14 @@
         $blog_authors = pull_data("blog_author");
         $dates_posted = pull_data("date_posted");
         $blog_likes = [];
+
+        $blog_ids = array_map('wp_unslash', $blog_ids);
+        $blog_texts = array_map('wp_unslash', $blog_texts);
+        $blog_titles = array_map('wp_unslash', $blog_titles);
+        $blog_authors = array_map('wp_unslash', $blog_authors);
+        $dates_posted = array_map('wp_unslash', $dates_posted);
+        $blog_likes = array_map('wp_unslash', $blog_likes);
+
         
         foreach ($blog_ids as $value) {
             $results = get_like_count($value);
@@ -155,37 +163,76 @@
         return ob_get_clean();
     }
 
-    // blog index
     public function show_blog_index() {
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'blog_post';
-        
-            $results = $wpdb->get_results("SELECT id, blog_title, date_posted FROM $table_name ORDER BY date_posted DESC");
-        
-            ob_start();
-            echo '<div class="ltr-blog-index" style="margin:5px;">';
-            echo '<h2>Table of Contents</h2>';
-            echo '<div style="width:100%;height:200px;overflow:auto;">';
-            echo '<ul style=" list-style-type: square;margin: 10px 0;">';
-        
-            foreach ($results as $row) {
-                // Format the date from YYYY-MM-DD HH:MM:SS to DD Month YYYY
-                $formatted_date = date("d F Y", strtotime($row->date_posted));
-
-                echo '<li>';
-                echo '<a href="#blog-post' . esc_html($row->id) .'">';
-                echo esc_html($row->blog_title) . '</a> | ';
-                echo esc_html($formatted_date) . '<br>';
-                echo '</li>';
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'blog_post';
+    
+        $posts_per_page = 15;
+        $current_page = isset($_GET['blog_page']) ? max(1, intval($_GET['blog_page'])) : 1;
+        $offset = ($current_page - 1) * $posts_per_page;
+    
+        // Total post count
+        $total_posts = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+        $total_pages = ceil($total_posts / $posts_per_page);
+    
+        // Fetch only the current page of posts
+        $results = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT id, blog_title, date_posted FROM $table_name ORDER BY date_posted DESC LIMIT %d OFFSET %d",
+                $posts_per_page,
+                $offset
+            )
+        );
+    
+        ob_start();
+        echo '<div class="ltr-blog-index" style="margin:5px;">';
+        echo '<h2>Table of Contents</h2>';
+        echo '<div style="width:100%;height:200px;overflow:auto;">';
+        echo '<ul style=" list-style-type: square;margin: 10px 0;">';
+    
+        foreach ($results as $row) {
+            $formatted_date = date("d F Y", strtotime($row->date_posted));
+            $clean_title = wp_unslash($row->blog_title);
+            echo '<li>';
+            echo '<a href="#blog-post' . esc_html($row->id) .'">';
+            echo esc_html($clean_title) . '</a> | ';
+            echo esc_html($formatted_date) . '<br>';
+            echo '</li>';
+        }
+    
+        echo '</ul>';
+        echo '</div>';
+    
+        // Page navigation
+        echo '<div class="blog-page-menu" style="margin-top: 20px; text-align:center;">';
+        $base_url = remove_query_arg('blog_page');
+        $connector = strpos($base_url, '?') !== false ? '&' : '?';
+    
+        if ($current_page > 1) {
+            $prev_page = $current_page - 1;
+            echo '<a href="' . esc_url($base_url . $connector . 'blog_page=' . $prev_page) . '">← Previous</a> ';
+        }
+    
+        for ($i = 1; $i <= $total_pages; $i++) {
+            if ($i === $current_page) {
+                echo '<strong style="margin: 0 5px;">' . $i . '</strong>';
+            } else {
+                echo '<a href="' . esc_url($base_url . $connector . 'blog_page=' . $i) . '" style="margin: 0 5px;">' . $i . '</a>';
             }
-        
-            echo '</ul>';
-            echo '</div>';
-            echo '</div>';
-        
-            return ob_get_clean();
-        
+        }
+    
+        if ($current_page < $total_pages) {
+            $next_page = $current_page + 1;
+            echo ' <a href="' . esc_url($base_url . $connector . 'blog_page=' . $next_page) . '">Next →</a>';
+        }
+    
+        echo '</div>';
+        echo '</div>';
+    
+        return ob_get_clean();
     }
+    
+
     
     public function add_delete_button_ajax(){
         if (current_user_can('edit_others_posts')){
