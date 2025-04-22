@@ -54,7 +54,7 @@ class LifePerformances {
         wp_enqueue_style(
             'LifePerformancesPlugin',
             plugin_dir_url( __FILE__ ) . '/css/LifePerformancesPlugin.css',
-            array(),
+            [],
             1,
             'all'
         );

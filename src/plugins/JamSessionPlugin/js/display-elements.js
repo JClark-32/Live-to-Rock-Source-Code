@@ -13,6 +13,37 @@
         datesPosted.reverse();
         blogLikes.reverse();
     }
+
+    let can_delete = 0;
+
+    function checkDeletePermission(callback){
+        jQuery(document).ready(function($){
+            $.ajax({
+                url: ajaxurl,
+                data: {
+                    'action': 'add_delete_button_ajax',
+                },
+                success: function(data){
+                    if(data === "yes0"){
+                        can_delete = 1;
+                    } else {
+                        can_delete = 0;
+                    }
+                    if (typeof callback === "function") {
+                        callback();
+                    }
+                },
+                error: function(errorThrown){
+                    console.error("Error checking delete permission", errorThrown);
+                }
+            });
+        });
+    }
+
+    jQuery(document).ready(function($) {
+        checkDeletePermission(createBlogElements);
+    });
+    
     
     function createBlogElements(){
         const blogContainer = document.getElementById("ltr-blogs-here");
@@ -75,14 +106,14 @@
             //postDiv.appendChild(textPara);
             postDiv.appendChild(textDiv);
             
-            if(!currentUser == '0'){
+            if (currentUser !== '0') {
                 actionDiv.appendChild(likeButton);
                 likeColor();
-                //actionDiv.appendChild(likeCount);
                 actionDiv.appendChild(commentButton);
+                if (can_delete === 1) {
+                    actionDiv.appendChild(deleteButton);
+                }
             }
-
-            deleteButtonAppear();
 
             postDiv.appendChild(actionDiv);
             blogContainer.appendChild(postDiv);    
@@ -131,31 +162,6 @@
                         currentBlogDiv.remove();
                         alert("Successfully Deleted");
                         
-                    },
-                    error:function(errorThrown){
-                        window.alert("errorThrown");
-                    }
-                })
-            })
-        }
-
-        let can_delete = 0;
-        
-        function deleteButtonAppear(){
-            jQuery(document).ready(function($){
-                $.ajax({
-                    url:ajaxurl,
-                    data:{
-                        'action':'add_delete_button_ajax',
-                    },
-                    success:function(data){
-                        if(data=="yes0"){
-                            actionDiv.appendChild(deleteButton);
-                            can_delete = 1;
-                        }
-                        else{
-                            can_delete = 0;
-                        }
                     },
                     error:function(errorThrown){
                         window.alert("errorThrown");
@@ -380,5 +386,4 @@
             
         }
     });
-        
 }
