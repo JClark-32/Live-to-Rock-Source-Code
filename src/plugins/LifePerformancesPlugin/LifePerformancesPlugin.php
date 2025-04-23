@@ -44,7 +44,6 @@ class LifePerformances {
         add_shortcode('ltr-email-status', array( $this, 'email_status_shortcode' ) ); // New shortcode to display email status
 
         add_action('plugins_loaded', array( $this,'wporg_add_video_submission_ability') );
-        add_action('plugins_loaded', array( $this,'wporg_add_video_deletion_ability') );
 
         // Handle approve and delete actions
         add_action('init', array( $this, 'handle_video_actions') );
@@ -76,19 +75,16 @@ class LifePerformances {
 
     // Changes the shortcode to show the video submission if the user can edit posts, i.e., Editor and above
     function wporg_add_video_submission_ability() {
-        if ( current_user_can('read')){
+        if ( current_user_can('edit_others_posts')){
+            remove_shortcode('ltr-delete-video');
+            add_shortcode('ltr-delete-video', array($this, 'delete_videos'));
+        }
+        if (is_user_logged_in()){
             remove_shortcode('ltr-video-submission');
             add_shortcode('ltr-video-submission', array( $this,'load_video_submission') );
         }
     }
 
-    function wporg_add_video_deletion_ability(){
-        if ( current_user_can('edit_others_posts')){
-            remove_shortcode('ltr-delete-video');
-            add_shortcode('ltr-delete-video', array($this, 'delete_videos'));
-        }
-    }
-    
     public function video_id() {
         get_video_id();
     }
