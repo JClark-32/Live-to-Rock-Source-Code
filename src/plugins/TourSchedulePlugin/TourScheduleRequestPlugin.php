@@ -53,7 +53,7 @@ class TourScheduleRequest {
 
     // Changes the shortcode to show the event submission if the user can edit posts, i.e., Editor and above
     function wporg_add_event_submission_ability() {
-        if ( current_user_can('read')){
+        if ( is_user_logged_in()){
             remove_shortcode('ltr-event-submission');
             add_shortcode('ltr-event-submission', array( $this,'load_event_submission') );
         }
