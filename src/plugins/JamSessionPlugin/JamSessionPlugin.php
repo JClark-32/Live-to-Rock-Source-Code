@@ -155,7 +155,10 @@
             currentUser = <?php echo json_encode($user_id) ?>;
             
             reverseArrays();
-            //createBlogElements();
+            
+            if (currentUser == 0){
+                createBlogElements();
+            }
         </script>
         <?php
 
