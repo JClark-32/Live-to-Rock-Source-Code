@@ -53,7 +53,7 @@ class LinerNotes {
 
     // Changes the shortcode to show the liner submission if the user can edit posts, i.e., Editor and above
     function wporg_add_liner_submission_ability() {
-        if ( current_user_can('edit_others_posts')){
+        if ( is_user_logged_in()){
             remove_shortcode('ltr-liner-submission');
             add_shortcode('ltr-liner-submission', array( $this,'load_liner_submission') );
         }

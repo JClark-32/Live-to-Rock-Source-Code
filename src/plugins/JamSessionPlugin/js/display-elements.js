@@ -40,9 +40,11 @@
         });
     }
 
+
     jQuery(document).ready(function($) {
         checkDeletePermission(createBlogElements);
     });
+    
     
     
     function createBlogElements(){
@@ -106,7 +108,7 @@
             //postDiv.appendChild(textPara);
             postDiv.appendChild(textDiv);
             
-            if (currentUser !== '0') {
+            if (currentUser !== 0) {
                 actionDiv.appendChild(likeButton);
                 likeColor();
                 actionDiv.appendChild(commentButton);

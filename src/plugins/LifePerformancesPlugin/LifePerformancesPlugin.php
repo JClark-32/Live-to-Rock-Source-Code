@@ -78,6 +78,8 @@ class LifePerformances {
         if ( current_user_can('edit_others_posts')){
             remove_shortcode('ltr-delete-video');
             add_shortcode('ltr-delete-video', array($this, 'delete_videos'));
+        }
+        if (is_user_logged_in()){
             remove_shortcode('ltr-video-submission');
             add_shortcode('ltr-video-submission', array( $this,'load_video_submission') );
         }
